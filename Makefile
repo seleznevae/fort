@@ -1,4 +1,11 @@
 all: fort
 
+LIBFORT_PATH=./libfort/lib
+LIBFORT_SRC=${LIBFORT_PATH}/fort.c
+
+
 fort: main.c
-	gcc -Wall -Wextra -Werror main.c fort.c -o fort
+	${CC} -Wall -Wextra -Werror main.c ${LIBFORT_SRC} -I${LIBFORT_PATH} -o fort
+
+clean:
+	rm -f fort
