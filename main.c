@@ -2,14 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "fort.h"
 
-static void exit_with_error()
+static void exit_with_error(const char *message)
 {
-    fprintf(stderr, "Internal libfort error\n");
+    fprintf(stderr, "fort: error: %s\n", message);
     exit(EXIT_FAILURE);
 }
+
+#define FORT_MAJOR_VERSION   0
+#define FORT_MINOR_VERSION   1
+#define FORT_BUGFIX_VERSION  0
 
 #define BUFFER_SIZE (1 << 10)
 #define MAX_BUFFER_SIZE (1 << 16)
@@ -64,50 +69,92 @@ struct ft_border_style * get_border_style(const char *str)
     return NULL;
 }
 
+struct global_opts_t {
+    struct ft_border_style *border_style;
+    int dummy;
+    char col_separator;
+} global_opts;
+
+static const char *opt_string = "b:hs:v";
+
+void set_default_options()
+{
+    global_opts.border_style = FT_EMPTY_STYLE;
+    global_opts.dummy = 0;
+    global_opts.col_separator = COL_SEPARATOR;
+}
+
+static const struct option long_opts[] = {
+    { "border-style", required_argument, NULL, 'b' },
+    { "help", no_argument, NULL, 'h' },
+    { "separator", required_argument, NULL, 's' },
+    { "version", no_argument, NULL, 'v' },
+};
+
+const char HELP_STRING[] =
+    "Usage: fort [OPTION]... [FILE]\n"
+    "Formats its input into formatted table.\n"
+    "\n"
+    "With no FILE, or when FILE is -, read standard input.\n"
+    "\n"
+    "  -b, --border-style     border style of the output table\n"
+    "  -h, --help             print help\n"
+    "  -s, --separator        set field separator char of input file\n"
+    "  -v, --version          output version information and exit\n";
 
 int main(int argc, char *argv[])
 {
-    (void)argc;
-    (void)argv;
-
     int status = EXIT_SUCCESS;
     FILE *fin;
     int lin_sz = sizeof(char) * BUFFER_SIZE;
     char *current_line = malloc(lin_sz);
     if (current_line == NULL)
-        exit_with_error();
+        exit_with_error("Internal error");
 
+    set_default_options();
 
-    struct ft_border_style *border_style = FT_EMPTY_STYLE;
-
+    /* Reading options */
     int opt;
-    while ((opt = getopt(argc, argv, "b:")) != -1) {
+    int longindex;
+    while ((opt = getopt_long(argc, argv, opt_string, long_opts, &longindex)) != -1) {
         switch (opt) {
             case 'b':
-                border_style = get_border_style(optarg);
-                if (!border_style)
-                    exit_with_error();// todo something    
+                global_opts.border_style = get_border_style(optarg);
+                if (!global_opts.border_style)
+                    exit_with_error("Invalid border style");    
                 break;
+            case 'h':
+                printf(HELP_STRING);
+                return EXIT_SUCCESS;
+                break;
+            case 's':
+                if (strlen(optarg) != 1)
+                    exit_with_error("Invalid separator");  
+                global_opts.col_separator = optarg[0];
+                break;
+            case 'v':
+                printf("fort %d.%d.%d\n", FORT_MAJOR_VERSION, FORT_MINOR_VERSION, FORT_BUGFIX_VERSION);
+                return EXIT_SUCCESS;
+                break;
+
             default:
-                exit_with_error();// todo something
+                exit_with_error("unrecognized arguments:"); //todo: add print unrecognised args
         }
     }
 
-
     ft_table_t *table = ft_create_table();
     if (table == NULL)
-        exit_with_error();
+        exit_with_error("Internal error");
 
-    ft_set_border_style(table, border_style);
+    ft_set_border_style(table, global_opts.border_style);
 
     /* Reading input file */
     fin = stdin;
     while (fgets(current_line, lin_sz, fin)) {
-        // printf("READ line(%d):%s", (int)strlen(current_line), current_line);
         char *beg = current_line;
         char *end = current_line;
         while (1) {
-            while (*end && *end != COL_SEPARATOR) {
+            while (*end && *end != global_opts.col_separator) {
                 ++end;
             }
             if (beg == end) {
@@ -128,10 +175,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    /* Convert table to string and print */
     const char *str = ft_to_string(table);
     if (str == NULL)
-        exit_with_error();
-
+        exit_with_error("Internal error");
     printf("%s", str);
 
     ft_destroy_table(table);

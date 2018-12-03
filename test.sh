@@ -13,7 +13,7 @@ function check_test_result()
 TMP_FILE=tmp_XXX
 
 ##########################################################
-TEST_CASE="SIMPLE TAST CASE"
+TEST_CASE="SIMPLE TEST CASE"
 
 ./fort -b basic > "${TMP_FILE}" <<DATA
 1|3
@@ -29,7 +29,7 @@ ETALON
 
 check_test_result $? "${TEST_CASE}"
 ##########################################################
-TEST_CASE="SIMPLE TAST CASE 2"
+TEST_CASE="SIMPLE TEST CASE 2"
 
 ./fort -b basic > "${TMP_FILE}" <<DATA
 1|3|5
@@ -45,6 +45,22 @@ diff "${TMP_FILE}" -  <<ETALON
 | 4 | 5  |    |    |
 | 1 | 22 | 33 | 66 |
 +---+----+----+----+
+ETALON
+
+check_test_result $? "${TEST_CASE}"
+##########################################################
+TEST_CASE="SIMPLE SEPARATOR TEST CASE"
+
+./fort -b basic -s % > "${TMP_FILE}" <<DATA
+1%3
+4%5
+DATA
+
+diff "${TMP_FILE}" - >/dev/null  2>/dev/null <<ETALON
++---+---+
+| 1 | 3 |
+| 4 | 5 |
++---+---+
 ETALON
 
 check_test_result $? "${TEST_CASE}"
