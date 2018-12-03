@@ -1,0 +1,23 @@
+language: C
+matrix:
+  include:
+    - name: "Basic linux gcc"
+      os: linux
+      sudo: false
+      compiler: gcc
+      before_script:
+        - git submodule init
+        - git submodule update
+
+script:
+  - make
+
+
+
+
+
+
+
+
+
+
