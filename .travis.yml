@@ -11,7 +11,7 @@ matrix:
 
 script:
   - make
-  - test.sh
+  - ./test.sh
 
 
 
