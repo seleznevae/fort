@@ -69,29 +69,14 @@ struct ft_border_style * get_border_style(const char *str)
     return NULL;
 }
 
-struct global_opts_t {
-    struct ft_border_style *border_style;
-    int dummy;
-    char col_separator;
-} global_opts;
-
-static const char *opt_string = "b:hs:v";
-
-void set_default_options()
-{
-    global_opts.border_style = FT_EMPTY_STYLE;
-    global_opts.dummy = 0;
-    global_opts.col_separator = COL_SEPARATOR;
-}
-
-static int header_enabled = 0;
 struct header_index {
     int index;
     struct header_index *next;
 };
-static struct header_index *header_indexes = NULL;
-static void set_header_indexes(char *indexes_str)
+
+static struct header_index * set_header_indexes(char *indexes_str)
 {
+    struct header_index *header_indexes;
     if (indexes_str == NULL) {
         header_indexes = (struct header_index *)malloc(sizeof(struct header_index));
         header_indexes->index = 0;
@@ -113,7 +98,28 @@ static void set_header_indexes(char *indexes_str)
             str = strtok(NULL, ",");
         }
     }
+    return header_indexes;
 }
+
+struct global_opts_t {
+    struct ft_border_style *border_style;
+    int dummy;
+    char col_separator;
+    struct header_index *header_indexes;
+} global_opts;
+
+static const char *opt_string = "b:hs:v";
+
+void set_default_options()
+{
+    global_opts.border_style = FT_EMPTY_STYLE;
+    global_opts.dummy = 0;
+    global_opts.col_separator = COL_SEPARATOR;
+    global_opts.header_indexes = NULL;
+}
+
+static int header_enabled = 0;
+
 
 #define OPT_BORDER_STYLE_INDEX    0
 #define OPT_HEADER_INDEX          1
@@ -136,6 +142,7 @@ const char HELP_STRING[] =
     "With no FILE, or when FILE is -, read standard input.\n"
     "\n"
     "  -b, --border-style     border style of the output table\n"
+    "  --header               set row numbers that will be treated as headers\n"
     "  -h, --help             print help\n"
     "  -s, --separator        set field separator char of input file\n"
     "  -v, --version          output version information and exit\n";
@@ -158,7 +165,7 @@ int main(int argc, char *argv[])
         switch (opt) {
             case 0:
                 if (longindex == OPT_HEADER_INDEX) {
-                    set_header_indexes(optarg);
+                    global_opts.header_indexes = set_header_indexes(optarg);
                 } else {
                     exit_with_error("Invalid option"); 
                 }
@@ -197,9 +204,9 @@ int main(int argc, char *argv[])
 
     ft_set_border_style(table, global_opts.border_style);
 
-    while (header_indexes) {
-        ft_set_cell_prop(table, header_indexes->index, FT_ANY_COLUMN, FT_CPROP_ROW_TYPE, FT_ROW_HEADER);
-        header_indexes = header_indexes->next;
+    while (global_opts.header_indexes) {
+        ft_set_cell_prop(table, global_opts.header_indexes->index, FT_ANY_COLUMN, FT_CPROP_ROW_TYPE, FT_ROW_HEADER);
+        global_opts.header_indexes = global_opts.header_indexes->next;
     }
 
     /* Reading input file */
