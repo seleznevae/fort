@@ -2,7 +2,7 @@
 
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
-
+import sys
 
 test_cases = [
 {
@@ -93,3 +93,4 @@ for test_case in test_cases:
         print test_case["output"]
         print 'Recieved'
         print output
+        sys.exit("Test failed!")
