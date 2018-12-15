@@ -12,7 +12,7 @@ matrix:
 script:
   - make
   - ./test.sh
-
+  - ./test.py
 
 
 
