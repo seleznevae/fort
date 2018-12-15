@@ -84,8 +84,46 @@ void set_default_options()
     global_opts.col_separator = COL_SEPARATOR;
 }
 
+static int header_enabled = 0;
+struct header_index {
+    int index;
+    struct header_index *next;
+};
+static struct header_index *header_indexes = NULL;
+static void set_header_indexes(char *indexes_str)
+{
+    if (indexes_str == NULL) {
+        header_indexes = (struct header_index *)malloc(sizeof(struct header_index));
+        header_indexes->index = 0;
+        header_indexes->next = NULL;
+    } else {
+        char *strtok(char *string, const char *delim);
+        const char *str = strtok(indexes_str, ",");
+        while (str) {
+            char *endptr = NULL;
+            int index = strtoll (str, &endptr, 10);
+            if (*endptr != '\0') {
+                exit_with_error("Invalid header row number");  
+                // exit_with_error("Invalid header row number: %s", str);  
+            }
+            struct header_index * new_header_index = (struct header_index *)malloc(sizeof(struct header_index));
+            new_header_index->index = index;
+            new_header_index->next = header_indexes;
+            header_indexes = new_header_index;
+            str = strtok(NULL, ",");
+        }
+    }
+}
+
+#define OPT_BORDER_STYLE_INDEX    0
+#define OPT_HEADER_INDEX          1
+#define OPT_HELP_INDEX            2
+#define OPT_SEPARATOR_INDEX       3
+#define OPT_VERSION_INDEX         4
+
 static const struct option long_opts[] = {
     { "border-style", required_argument, NULL, 'b' },
+    { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
     { "separator", required_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v' },
@@ -118,10 +156,21 @@ int main(int argc, char *argv[])
     int longindex;
     while ((opt = getopt_long(argc, argv, opt_string, long_opts, &longindex)) != -1) {
         switch (opt) {
+            case 0:
+                if (longindex == OPT_HEADER_INDEX) {
+                    set_header_indexes(optarg);
+                } else {
+                    exit_with_error("Invalid option"); 
+                }
+                break;
             case 'b':
                 global_opts.border_style = get_border_style(optarg);
                 if (!global_opts.border_style)
                     exit_with_error("Invalid border style");    
+                break;
+            case 'z':
+                printf("%s\n", optarg);
+                return EXIT_SUCCESS;
                 break;
             case 'h':
                 printf(HELP_STRING);
@@ -147,6 +196,11 @@ int main(int argc, char *argv[])
         exit_with_error("Internal error");
 
     ft_set_border_style(table, global_opts.border_style);
+
+    while (header_indexes) {
+        ft_set_cell_prop(table, header_indexes->index, FT_ANY_COLUMN, FT_CPROP_ROW_TYPE, FT_ROW_HEADER);
+        header_indexes = header_indexes->next;
+    }
 
     /* Reading input file */
     fin = stdin;
@@ -174,6 +228,8 @@ int main(int argc, char *argv[])
             beg = end;
         }
     }
+
+
 
     /* Convert table to string and print */
     const char *str = ft_to_string(table);
