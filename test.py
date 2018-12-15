@@ -84,13 +84,15 @@ for test_case in test_cases:
     print "Executing {}".format(test_case["name"])
     process = Popen(["./fort"] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     (output_b, err) = process.communicate(input=test_case["input"])
+    if err:
+        print "Error encountered: {}".format(err)
     output = output_b.decode('ascii')
     if output != test_case["output"]:
         print ' Test Failed'
-        print 'Input'
+        print '  Input'
         print test_case["input"]
-        print 'Expected'
+        print '  Expected'
         print test_case["output"]
-        print 'Recieved'
+        print '  Recieved'
         print output
         sys.exit("Test failed!")

@@ -76,7 +76,7 @@ struct header_index {
 
 static struct header_index * set_header_indexes(char *indexes_str)
 {
-    struct header_index *header_indexes;
+    struct header_index *header_indexes = NULL;
     if (indexes_str == NULL) {
         header_indexes = (struct header_index *)malloc(sizeof(struct header_index));
         header_indexes->index = 0;
