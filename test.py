@@ -6,6 +6,14 @@ import sys
 
 test_cases = [
 {
+"group": "test input",
+"name": "invalid input file",
+"args": ["dummy_name"],
+"input": "",
+"output": "fort: error: No such file or directory\n",
+"exitCode": 1
+},
+{
 "name": "simple test",
 "args": ["-b", "basic"],
 "input": '''\
@@ -38,7 +46,7 @@ test_cases = [
 '''
 },
 {
-"name": "simple separator test",
+"name": "simple field separator test",
 "args": ["-b", "basic", "-s", "%"],
 "input": '''\
 1%3
@@ -84,6 +92,14 @@ for test_case in test_cases:
     print "Executing {}".format(test_case["name"])
     process = Popen(["./fort"] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
     (output_b, err) = process.communicate(input=test_case["input"])
+
+    if "exitCode" in test_case:
+        expCode = test_case["exitCode"]
+    else:
+        expCode = 0
+    if expCode != process.returncode:
+        print "Invalid return code: expected {}, recieved {}".format(expCode, process.returncode)
+
     if err:
         print "Error encountered: {}".format(err)
     output = output_b.decode('ascii')

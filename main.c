@@ -1,8 +1,9 @@
+#include <errno.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <getopt.h>
 
 #include "fort.h"
 
@@ -12,13 +13,19 @@ static void exit_with_error(const char *message)
     exit(EXIT_FAILURE);
 }
 
+static void exit_with_sys_error()
+{
+    fprintf(stderr, "fort: error: %s\n", strerror(errno));
+    exit(EXIT_FAILURE);
+}
+
 #define FORT_MAJOR_VERSION   0
 #define FORT_MINOR_VERSION   1
 #define FORT_BUGFIX_VERSION  0
 
 #define BUFFER_SIZE (1 << 10)
 #define MAX_BUFFER_SIZE (1 << 16)
-#define COL_SEPARATOR '|'
+#define COL_SEPARATOR "|"
 #define NEW_LINE_CHAR '\n'
 
 struct ft_border_style * get_border_style(const char *str)
@@ -104,7 +111,7 @@ static struct header_index * set_header_indexes(char *indexes_str)
 struct global_opts_t {
     struct ft_border_style *border_style;
     int dummy;
-    char col_separator;
+    const char *col_separator;
     struct header_index *header_indexes;
 } global_opts;
 
@@ -144,7 +151,7 @@ const char HELP_STRING[] =
     "  -b, --border-style     border style of the output table\n"
     "  --header               set row numbers that will be treated as headers\n"
     "  -h, --help             print help\n"
-    "  -s, --separator        set field separator char of input file\n"
+    "  -s, --separator        specify set of characters to be used to delimit columns\n"
     "  -v, --version          output version information and exit\n";
 
 int main(int argc, char *argv[])
@@ -184,9 +191,7 @@ int main(int argc, char *argv[])
                 return EXIT_SUCCESS;
                 break;
             case 's':
-                if (strlen(optarg) != 1)
-                    exit_with_error("Invalid separator");  
-                global_opts.col_separator = optarg[0];
+                global_opts.col_separator = optarg;
                 break;
             case 'v':
                 printf("fort %d.%d.%d\n", FORT_MAJOR_VERSION, FORT_MINOR_VERSION, FORT_BUGFIX_VERSION);
@@ -210,12 +215,19 @@ int main(int argc, char *argv[])
     }
 
     /* Reading input file */
-    fin = stdin;
+    if (optind >= argc || strcmp(argv[optind], "-") == 0) {
+        fin = stdin;
+    } else {
+        fin = fopen(argv[optind], "r");
+        if (!fin) {
+            exit_with_sys_error();
+        }
+    }
     while (fgets(current_line, lin_sz, fin)) {
         char *beg = current_line;
         char *end = current_line;
         while (1) {
-            while (*end && *end != global_opts.col_separator) {
+            while (*end && strchr(global_opts.col_separator, *end) == NULL) {
                 ++end;
             }
             if (beg == end) {
