@@ -1,11 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
 from subprocess import call
 import sys
 import os
-
 
 test_suites = []
 
@@ -65,6 +65,24 @@ input_test_suite = {
 test_suites.append(input_test_suite)
 
 
+##############  Input UTF-8 cases  ##################
+input_utf8_test_suite = {
+"name": "Input UTF-8 tests",
+"scenarios": [
+{
+"name": "input from file",
+"args": ["-b", "basic", "tmp_file"],
+"beforeScript": "echo  'Мама|мыла\nРа|мумумумумум' > tmp_file",
+"input": "",
+"output": u'''\
++------+-------------+
+| Мама | мыла        |
+| Ра   | мумумумумум |
++------+-------------+
+'''
+}
+]}
+test_suites.append(input_utf8_test_suite)
 
 
 ###############  Simple test cases  ##################
@@ -190,7 +208,7 @@ for test_suite in test_suites:
 
         if err:
             print "Error encountered: {}".format(err)
-        output = output_b.decode('ascii')
+        output = output_b.decode('utf-8')
         if output != test_case["output"]:
             print ' Test Failed'
             print '  Input'

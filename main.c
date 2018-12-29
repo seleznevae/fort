@@ -5,6 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <wchar.h>
+#include <locale.h>
+#include <iconv.h>
 #include "fort.h"
 
 static void exit_with_error(const char *message)
@@ -154,6 +157,36 @@ const char HELP_STRING[] =
     "  -s, --separator        specify set of characters to be used to delimit columns\n"
     "  -v, --version          output version information and exit\n";
 
+
+#ifdef FT_HAVE_WCHAR
+wchar_t *utf8_str_to_wchar_str(char *beg, char *end)
+{
+    iconv_t cd = iconv_open("WCHAR_T", "UTF-8");
+    if (cd == (iconv_t)-1) {
+        exit_with_error("internal error: iconv_open");
+    }
+
+    // todo: do normal implementation for wchar_str with dynamically allocating if necessary
+    static wchar_t wchar_str[2048] = L"";
+    memset((void*)wchar_str, 0, sizeof(wchar_str));
+    //wchar_str[0] = L'\0';
+    char *inbuf = beg;
+    size_t inbytesleft = end - beg;
+    char *outbuf = (char*)wchar_str;
+    size_t outbytesleft = sizeof(wchar_str);
+    size_t ir = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+    if (ir == (size_t)-1) {
+        exit_with_error("internal error: iconv");
+    }
+    if (inbytesleft) {
+        exit_with_error("internal error: iconv in bytes left");
+    }
+    
+    iconv_close(cd);
+    return wchar_str;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     int status = EXIT_SUCCESS;
@@ -238,23 +271,39 @@ int main(int argc, char *argv[])
                     --end;
                     *end = '\0';
                 }
+#ifdef FT_HAVE_WCHAR
+                ft_wwrite_ln(table, utf8_str_to_wchar_str(beg, end));
+#else
                 ft_write_ln(table, beg);
+#endif
                 break;
             }
             *end = '\0';
+#ifdef FT_HAVE_WCHAR
+            ft_wwrite(table, utf8_str_to_wchar_str(beg, end));
+#else
             ft_write(table, beg);
+#endif
             ++end;
             beg = end;
         }
     }
 
 
-
+#ifdef FT_HAVE_WCHAR
+    setlocale(LC_CTYPE, "");
+    /* Convert table to string and print */
+    const wchar_t *str = ft_to_wstring(table);
+    if (str == NULL)
+        exit_with_error("Internal error");
+    fwprintf(stdout, L"%ls", str);
+#else
     /* Convert table to string and print */
     const char *str = ft_to_string(table);
     if (str == NULL)
         exit_with_error("Internal error");
     printf("%s", str);
+#endif
 
     ft_destroy_table(table);
 
