@@ -182,7 +182,7 @@ header_test_suite = {
 '''
 },
 ]}
-test_suites.append(separator_test_suite)
+test_suites.append(header_test_suite)
 
 ###############  Border styles test cases  ##################
 
