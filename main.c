@@ -29,7 +29,7 @@ static void exit_with_sys_error()
 #define BUFFER_SIZE (1 << 10)
 #define MAX_BUFFER_SIZE (1 << 16)
 #define COL_SEPARATOR "|"
-#define NEW_LINE_CHAR '\n'
+#define ROW_SEPARATOR "\n"
 
 struct ft_border_style * get_border_style(const char *str)
 {
@@ -117,16 +117,18 @@ struct global_opts_t {
     struct ft_border_style *border_style;
     int dummy;
     const char *col_separator;
+    const char *row_separator;
     struct header_index *header_indexes;
 } global_opts;
 
-static const char *opt_string = "b:hs:v";
+static const char *opt_string = "b:hn:s:v";
 
 void set_default_options()
 {
     global_opts.border_style = FT_EMPTY_STYLE;
     global_opts.dummy = 0;
     global_opts.col_separator = COL_SEPARATOR;
+    global_opts.row_separator = ROW_SEPARATOR;
     global_opts.header_indexes = NULL;
 }
 
@@ -143,21 +145,23 @@ static const struct option long_opts[] = {
     { "border-style", required_argument, NULL, 'b' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
+    { "new-line-separator", required_argument, NULL, 'n' },
     { "separator", required_argument, NULL, 's' },
     { "version", no_argument, NULL, 'v' },
 };
 
 const char HELP_STRING[] =
     "Usage: fort [OPTION]... [FILE]\n"
-    "Formats its input into formatted table.\n"
+    "Format input into formatted table.\n"
     "\n"
     "With no FILE, or when FILE is -, read standard input.\n"
     "\n"
-    "  -b, --border-style     border style of the output table\n"
-    "  --header               set row numbers that will be treated as headers\n"
-    "  -h, --help             print help\n"
-    "  -s, --separator        specify set of characters to be used to delimit columns\n"
-    "  -v, --version          output version information and exit\n";
+    "  -b <style>, --border-style=<style>       border style of the output table\n"
+    "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
+    "  -h, --help                               print help and exit\n"
+    "  -n <set>, --new-line-separator=<set>     specify set of characters to be used to delimit rows\n"
+    "  -s <set>, --separator=<set>              specify set of characters to be used to delimit columns\n"
+    "  -v, --version                            output version information and exit\n";
 
 
 #ifdef FT_HAVE_WCHAR
@@ -189,14 +193,69 @@ wchar_t *utf8_str_to_wchar_str(char *beg, char *end)
 }
 #endif
 
+
+char *get_next_line(FILE *fin, const char *sep_set)
+{
+    static size_t size = 1024;
+    static size_t end_offset = 0;
+    static size_t start_offset = 0;
+    static char* cur_line = NULL;
+    
+    if (cur_line == NULL)
+        cur_line = (char *)malloc(size + 1);
+
+    if (cur_line == NULL)
+        exit_with_error("Not enough memory"); 
+
+    if (start_offset) {
+        size_t n_remained = end_offset - start_offset;
+        memmove(cur_line, cur_line + start_offset, n_remained);
+        start_offset = 0;
+        end_offset = n_remained;
+        cur_line[end_offset] = '\0';
+    }
+    
+    while (1) {
+        /* Search for new_line */
+        if (end_offset) {
+            size_t nl_pos = strcspn (cur_line, sep_set);
+            if (nl_pos < end_offset) {
+                cur_line[nl_pos] = '\0';
+                start_offset = nl_pos + 1;
+                return cur_line;
+            }
+        }
+
+        if (end_offset > size/2) {
+            cur_line = (char *)realloc(cur_line, (size + 1) * 2);
+            size *= 2;
+        }
+        if (cur_line == NULL)
+            exit_with_error("Not enough memory"); 
+
+        int n = fread(cur_line + end_offset, 1, (size - end_offset), fin);
+        if (n == -1)
+            exit_with_error("Error during input reading"); 
+        if (n == 0) {
+            if (end_offset == 0) {
+                return NULL;
+            } else {
+                start_offset = end_offset;
+                cur_line[end_offset] = '\0';
+                return cur_line;
+            }
+        }
+
+        end_offset += n;
+        cur_line[end_offset] = '\0';
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int status = EXIT_SUCCESS;
     FILE *fin;
-    int lin_sz = sizeof(char) * BUFFER_SIZE;
-    char *current_line = malloc(lin_sz);
-    if (current_line == NULL)
-        exit_with_error("Internal error");
+    char *current_line = NULL;
 
     set_default_options();
 
@@ -228,6 +287,9 @@ int main(int argc, char *argv[])
             case 's':
                 global_opts.col_separator = optarg;
                 break;
+            case 'n':
+                global_opts.row_separator = optarg;
+                break;
             case 'v':
                 printf("fort %d.%d.%d\n", FORT_MAJOR_VERSION, FORT_MINOR_VERSION, FORT_BUGFIX_VERSION);
                 return EXIT_SUCCESS;
@@ -258,7 +320,8 @@ int main(int argc, char *argv[])
             exit_with_sys_error();
         }
     }
-    while (fgets(current_line, lin_sz, fin)) {
+
+    while ((current_line = get_next_line(fin, global_opts.row_separator))) {
         char *beg = current_line;
         char *end = current_line;
         while (1) {
@@ -269,10 +332,6 @@ int main(int argc, char *argv[])
                 ft_ln(table);
                 break;
             } else if (*end == '\0') {
-                if (*(end - 1) == NEW_LINE_CHAR) {
-                    --end;
-                    *end = '\0';
-                }
 #ifdef FT_HAVE_WCHAR
                 ft_wwrite_ln(table, utf8_str_to_wchar_str(beg, end));
 #else

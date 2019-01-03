@@ -148,6 +148,27 @@ separator_test_suite = {
 ]}
 test_suites.append(separator_test_suite)
 
+###############  Row separator test cases  ##################
+
+row_separator_test_suite = {
+"name": "Row separator tests",
+"scenarios": [
+{
+"name": "simple row separator test",
+"args": ["-b", "basic", "-n", ";"],
+"input": '''1|3;4|5;;5|6|7''' ,
+"output": '''\
++---+---+---+
+| 1 | 3 |   |
+| 4 | 5 |   |
+|   |   |   |
+| 5 | 6 | 7 |
++---+---+---+
+'''
+},
+]}
+test_suites.append(row_separator_test_suite)
+
 
 ###############  Header test cases  ##################
 

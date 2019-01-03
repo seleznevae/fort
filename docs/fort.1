@@ -1,0 +1,104 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "FORT" "1" "January 2019" "" ""
+.
+.SH "NAME"
+\fBfort\fR \- format input into formatted table
+.
+.SH "SYNOPSIS"
+\fBfort\fR [\fIOPTION\fR\.\.\.] [\fIFILE\fR]\.\.\.
+.
+.SH "DESCRIPTION"
+Fort converts its input into the formatted text table\.
+.
+.P
+With no FILE, or when FILE is \-, read standard input\.
+.
+.P
+The input is broken into lines, default line separator = "\en", and lines are broken into fields, default field separator = "|"\. Fields content is then inserted into the cells of the resulting table\.
+.
+.P
+All lines of the input are threated equally\. To
+.
+.P
+A normal paragraph\. This can span multiple lines and is terminated with two or more line endings \-\- just like Markdown\.
+.
+.P
+Inline markup for \fBcode\fR, \fBuser input\fR, and \fBstrong\fR are displayed boldface; \fIvariable\fR, \fIemphasis\fR, \fIemphasis\fR, are displayed in italics (HTML) or underline (roff)\.
+.
+.P
+Manual references like sh(1), markdown(7), roff(7), etc\. are hyperlinked in HTML output\.
+.
+.P
+Link to sections like \fISTANDARDS\fR, \fISEE ALSO\fR, or [WITH A DIFFERENT LINK TEXT][#SEE\-ALSO]\.
+.
+.P
+Definition lists:
+.
+.TP
+\fB\-a\fR, \fB\-\-argument\fR=[\fIvalue\fR]
+One or more paragraphs describing the argument\.
+.
+.TP
+You can put whatever you \fIwant\fR here, really
+Nesting and paragraph spacing are respected\.
+.
+.P
+Frequently used sections:
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-b\fR \fIname\fR, \fB\-\-border\-style\fR=\fIname\fR
+Set border style of the output table\. Available border style names: \fBbasic\fR, \fBbasic2\fR, \fBsimple\fR, \fBplain\fR, \fBdot\fR, \fBempty\fR (default style), \fBempty2\fR, \fBsolid\fR, \fBsolid_round\fR, \fBnice\fR, \fBdouble\fR, \fBdouble2\fR, \fBbold\fR, \fBbold2\fR, \fBframe\fR\.
+.
+.TP
+\fB\-\-header\fR=\fIn1\fR[,\fIn2\fR\.\.\.]
+Set row numbers that will be treated as headers\.
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Display help and exit\.
+.
+.TP
+\fB\-n\fR \fISET\fR, \fB\-\-new\-line\-separator\fR=\fISET\fR
+Specify set of characters to be used as row delimeters\.
+.
+.TP
+\fB\-s\fR \fISET\fR, \fB\-\-separator\fR=\fISET\fR
+Specify set of characters to be used as field delimeters\.
+.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Display version information and exit\.
+.
+.TP
+You can put whatever you \fIwant\fR here, really
+Nesting and paragraph spacing are respected\.
+.
+.SH "SYNTAX"
+.
+.SH "ENVIRONMENT"
+.
+.SH "RETURN VALUES"
+.
+.SH "STANDARDS"
+.
+.SH "SECURITY CONSIDERATIONS"
+.
+.SH "BUGS"
+.
+.SH "HISTORY"
+.
+.SH "AUTHOR"
+
+.
+.P
+Written by Anton Seleznev\.
+.
+.SH "COPYRIGHT"
+Copyright (C) 2018 Anton Seleznev License MIT ???
+.
+.SH "SEE ALSO"
+ronn\-format(7), manpages(5), man(1), roff(7), groff(1), markdown(7) change this list!!
