@@ -203,6 +203,22 @@ separator_test_suite = {
 +---+---+
 '''
 },
+{
+"name": "Multiple field separators test",
+"args": ["-b", "basic", "--separator=%^*"],
+"input": '''\
+1%3
+4^5
+7*8
+''' ,
+"output": '''\
++---+---+
+| 1 | 3 |
+| 4 | 5 |
+| 7 | 8 |
++---+---+
+'''
+},
 ]}
 test_suites.append(separator_test_suite)
 
@@ -215,6 +231,19 @@ row_separator_test_suite = {
 "name": "simple row separator test",
 "args": ["-b", "basic", "-n", ";"],
 "input": '''1|3;4|5;;5|6|7''' ,
+"output": '''\
++---+---+---+
+| 1 | 3 |   |
+| 4 | 5 |   |
+|   |   |   |
+| 5 | 6 | 7 |
++---+---+---+
+'''
+},
+{
+"name": "Multiple row separators test",
+"args": ["-b", "basic", "--new-line-separator=;:&"],
+"input": '''1|3;4|5:&5|6|7''' ,
 "output": '''\
 +---+---+---+
 | 1 | 3 |   |
