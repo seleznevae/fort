@@ -119,9 +119,10 @@ struct global_opts_t {
     const char *col_separator;
     const char *row_separator;
     struct header_index *header_indexes;
+    int ignore_empty_lines;
 } global_opts;
 
-static const char *opt_string = "b:hn:s:v";
+static const char *opt_string = "b:ehn:s:v";
 
 void set_default_options()
 {
@@ -130,19 +131,23 @@ void set_default_options()
     global_opts.col_separator = COL_SEPARATOR;
     global_opts.row_separator = ROW_SEPARATOR;
     global_opts.header_indexes = NULL;
+    global_opts.ignore_empty_lines = 0;
 }
 
 static int header_enabled = 0;
 
 
 #define OPT_BORDER_STYLE_INDEX    0
-#define OPT_HEADER_INDEX          1
-#define OPT_HELP_INDEX            2
-#define OPT_SEPARATOR_INDEX       3
-#define OPT_VERSION_INDEX         4
+#define OPT_IGNORE_EMPTY_INDEX    1
+#define OPT_HEADER_INDEX          2
+#define OPT_HELP_INDEX            3
+#define OPT_ROW_SEPARATOR_INDEX   4
+#define OPT_COL_SEPARATOR_INDEX   5
+#define OPT_VERSION_INDEX         6
 
 static const struct option long_opts[] = {
     { "border-style", required_argument, NULL, 'b' },
+    { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
     { "new-line-separator", required_argument, NULL, 'n' },
@@ -157,6 +162,7 @@ const char HELP_STRING[] =
     "With no FILE, or when FILE is -, read standard input.\n"
     "\n"
     "  -b <style>, --border-style=<style>       border style of the output table\n"
+    "  -e, --ignore-empty-lines                 ignore empty lines\n"
     "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
     "  -h, --help                               print help and exit\n"
     "  -n <set>, --new-line-separator=<set>     specify set of characters to be used to delimit rows\n"
@@ -283,6 +289,9 @@ int main(int argc, char *argv[])
                 if (!global_opts.border_style)
                     exit_with_error("Invalid border style");    
                 break;
+            case 'e':
+                global_opts.ignore_empty_lines = 1;
+                break;
             case 'z':
                 printf("%s\n", optarg);
                 return EXIT_SUCCESS;
@@ -329,6 +338,9 @@ int main(int argc, char *argv[])
     }
 
     while ((current_line = get_next_line(fin, global_opts.row_separator))) {
+        if (global_opts.ignore_empty_lines && current_line[0] == '\0')
+            continue;
+
         char *beg = current_line;
         char *end = current_line;
         while (1) {

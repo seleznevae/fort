@@ -43,6 +43,9 @@ Frequently used sections:
   * `-b` <name>, `--border-style`=<name>:
     Set border style of the output table. Available border style names: **basic**, **basic2**, **simple**, **plain**, **dot**, **empty** (default style), **empty2**, **solid**, **solid_round**, **nice**, **double**,      **double2**, **bold**, **bold2**, **frame**.
   
+  * `-e`, `--ignore-empty-lines`:
+    Ignore empty lines in input.
+
   * `--header`=<n1>[,<n2>...]:
     Set row numbers that will be treated as headers.
 

@@ -141,6 +141,48 @@ simple_test_suite = {
 ]}
 test_suites.append(simple_test_suite)
 
+###############  Ignore empty lines test cases  ##################
+ignore_empty_test_suite = {
+"name": "Ignore empty tests",
+"scenarios": [
+{
+"name": "Short option test",
+"args": ["-b", "basic", "-e"],
+"input": '''\
+1|3|5
+
+4|5
+
+1|22|33|66
+''' ,
+"output": '''\
++---+----+----+----+
+| 1 | 3  | 5  |    |
+| 4 | 5  |    |    |
+| 1 | 22 | 33 | 66 |
++---+----+----+----+
+'''
+},
+{
+"name": "Long option test",
+"args": ["-b", "basic", "--ignore-empty-lines"],
+"input": '''\
+1|3|5
+
+4|5
+
+1|22|33|66
+''' ,
+"output": '''\
++---+----+----+----+
+| 1 | 3  | 5  |    |
+| 4 | 5  |    |    |
+| 1 | 22 | 33 | 66 |
++---+----+----+----+
+'''
+}
+]}
+test_suites.append(ignore_empty_test_suite)
 
 ###############  Field separator test cases  ##################
 
