@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
             while (*end && strchr(global_opts.col_separator, *end) == NULL) {
                 ++end;
             }
-            if (beg == end) {
+            if (beg == end && *end == '\0') {
                 ft_ln(table);
                 break;
             } else if (*end == '\0') {

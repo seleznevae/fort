@@ -204,6 +204,20 @@ separator_test_suite = {
 '''
 },
 {
+"name": "Consecutive field separator test",
+"args": ["-b", "basic", "-s", "|"],
+"input": '''\
+1|3
+4||5
+''' ,
+"output": '''\
++---+---+---+
+| 1 | 3 |   |
+| 4 |   | 5 |
++---+---+---+
+'''
+},
+{
 "name": "Multiple field separators test",
 "args": ["-b", "basic", "--separator=%^*"],
 "input": '''\
