@@ -172,14 +172,21 @@ wchar_t *utf8_str_to_wchar_str(char *beg, char *end)
         exit_with_error("internal error: iconv_open");
     }
 
-    // todo: do normal implementation for wchar_str with dynamically allocating if necessary
-    static wchar_t wchar_str[2048] = L"";
-    memset((void*)wchar_str, 0, sizeof(wchar_str));
-    //wchar_str[0] = L'\0';
     char *inbuf = beg;
     size_t inbytesleft = end - beg;
+
+    static wchar_t *wchar_str = NULL;
+    static size_t sz = 0;
+    if (wchar_str == NULL || sz < inbytesleft) {
+        sz = 2 * inbytesleft + 1; /* multiply by 2 - for safety */
+        wchar_str = malloc(sz * sizeof(wchar_t));
+        if (wchar_str == NULL)
+            exit_with_error("Not enough memory");
+    }
+    memset((void*)wchar_str, 0, sz * sizeof(wchar_t));
     char *outbuf = (char*)wchar_str;
-    size_t outbytesleft = sizeof(wchar_str);
+    size_t outbytesleft = sz * sizeof(wchar_t);
+
     size_t ir = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
     if (ir == (size_t)-1) {
         exit_with_error("internal error: iconv");
