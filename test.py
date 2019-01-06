@@ -141,6 +141,49 @@ simple_test_suite = {
 ]}
 test_suites.append(simple_test_suite)
 
+###############  Merge empty cells test cases  ##################
+merge_empty_cell_test_suite = {
+"name": "Merge empty cells tests",
+"scenarios": [
+{
+"name": "Short option test",
+"args": ["-b", "basic", "-m"],
+"input": '''\
+1|||5
+||6
+4|5
+1|22||66
+''' ,
+"output": '''\
++---+----+----+
+| 1 | 5  |    |
+| 6 |    |    |
+| 4 | 5  |    |
+| 1 | 22 | 66 |
++---+----+----+
+'''
+},
+{
+"name": "Short option test",
+"args": ["-b", "basic", "--merge-empty-cell"],
+"input": '''\
+|||5
+||6
+4|5
+1|22||66
+''' ,
+"output": '''\
++---+----+----+
+| 5 |    |    |
+| 6 |    |    |
+| 4 | 5  |    |
+| 1 | 22 | 66 |
++---+----+----+
+'''
+},
+]}
+test_suites.append(merge_empty_cell_test_suite)
+
 ###############  Ignore empty lines test cases  ##################
 ignore_empty_test_suite = {
 "name": "Ignore empty tests",
@@ -219,7 +262,7 @@ separator_test_suite = {
 },
 {
 "name": "Multiple field separators test",
-"args": ["-b", "basic", "--separator=%^*"],
+"args": ["-b", "basic", "--col-separator=%^*"],
 "input": '''\
 1%3
 4^5
@@ -243,7 +286,7 @@ row_separator_test_suite = {
 "scenarios": [
 {
 "name": "simple row separator test",
-"args": ["-b", "basic", "-n", ";"],
+"args": ["-b", "basic", "-S", ";"],
 "input": '''1|3;4|5;;5|6|7''' ,
 "output": '''\
 +---+---+---+
@@ -256,7 +299,7 @@ row_separator_test_suite = {
 },
 {
 "name": "Multiple row separators test",
-"args": ["-b", "basic", "--new-line-separator=;:&"],
+"args": ["-b", "basic", "--row-separator=;:&"],
 "input": '''1|3;4|5:&5|6|7''' ,
 "output": '''\
 +---+---+---+

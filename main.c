@@ -120,9 +120,10 @@ struct global_opts_t {
     const char *row_separator;
     struct header_index *header_indexes;
     int ignore_empty_lines;
+    int merge_empty_cells;
 } global_opts;
 
-static const char *opt_string = "b:ehn:s:v";
+static const char *opt_string = "b:ehms:S:v";
 
 void set_default_options()
 {
@@ -132,26 +133,29 @@ void set_default_options()
     global_opts.row_separator = ROW_SEPARATOR;
     global_opts.header_indexes = NULL;
     global_opts.ignore_empty_lines = 0;
+    global_opts.merge_empty_cells = 0;
 }
 
 static int header_enabled = 0;
 
 
-#define OPT_BORDER_STYLE_INDEX    0
-#define OPT_IGNORE_EMPTY_INDEX    1
-#define OPT_HEADER_INDEX          2
-#define OPT_HELP_INDEX            3
-#define OPT_ROW_SEPARATOR_INDEX   4
-#define OPT_COL_SEPARATOR_INDEX   5
-#define OPT_VERSION_INDEX         6
+#define OPT_BORDER_STYLE_INDEX       0
+#define OPT_IGNORE_EMPTY_INDEX       1
+#define OPT_HEADER_INDEX             2
+#define OPT_HELP_INDEX               3
+#define OPT_MERGE_EMPTY_CELL_INDEX   4
+#define OPT_COL_SEPARATOR_INDEX      5
+#define OPT_ROW_SEPARATOR_INDEX      6
+#define OPT_VERSION_INDEX            7
 
 static const struct option long_opts[] = {
     { "border-style", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
-    { "new-line-separator", required_argument, NULL, 'n' },
-    { "separator", required_argument, NULL, 's' },
+    { "merge-empty-cell", no_argument, NULL, 'm' },
+    { "col-separator", required_argument, NULL, 's' },
+    { "row-separator", required_argument, NULL, 'S' },
     { "version", no_argument, NULL, 'v' },
 };
 
@@ -165,8 +169,9 @@ const char HELP_STRING[] =
     "  -e, --ignore-empty-lines                 ignore empty lines\n"
     "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
     "  -h, --help                               print help and exit\n"
-    "  -n <set>, --new-line-separator=<set>     specify set of characters to be used to delimit rows\n"
-    "  -s <set>, --separator=<set>              specify set of characters to be used to delimit columns\n"
+    "  -m, --merge-empty-cell                   merge empty cells\n"
+    "  -s <set>, --col-separator=<set>          specify set of characters to be used to delimit columns\n"
+    "  -S <set>, --row-separator=<set>          specify set of characters to be used to delimit rows\n"
     "  -v, --version                            output version information and exit\n";
 
 
@@ -300,10 +305,13 @@ int main(int argc, char *argv[])
                 printf(HELP_STRING);
                 return EXIT_SUCCESS;
                 break;
+            case 'm':
+                global_opts.merge_empty_cells = 1;
+                break;
             case 's':
                 global_opts.col_separator = optarg;
                 break;
-            case 'n':
+            case 'S':
                 global_opts.row_separator = optarg;
                 break;
             case 'v':
@@ -351,19 +359,28 @@ int main(int argc, char *argv[])
                 ft_ln(table);
                 break;
             } else if (*end == '\0') {
+                if (beg != end || !global_opts.merge_empty_cells) {
 #ifdef FT_HAVE_WCHAR
-                ft_wwrite_ln(table, utf8_str_to_wchar_str(beg, end));
+                    ft_wwrite_ln(table, utf8_str_to_wchar_str(beg, end));
 #else
-                ft_write_ln(table, beg);
+                    ft_write_ln(table, beg);
 #endif
+                } else {
+                    ft_ln(table);
+                }
+
                 break;
             }
             *end = '\0';
+
+            if (beg != end || !global_opts.merge_empty_cells) {
 #ifdef FT_HAVE_WCHAR
-            ft_wwrite(table, utf8_str_to_wchar_str(beg, end));
+                ft_wwrite(table, utf8_str_to_wchar_str(beg, end));
 #else
-            ft_write(table, beg);
+                ft_write(table, beg);
 #endif
+            }
+
             ++end;
             beg = end;
         }

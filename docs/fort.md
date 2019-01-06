@@ -52,11 +52,14 @@ Frequently used sections:
   * `-h`, `--help`:
     Display help and exit.
 
-  * `-n` <SET>, `--new-line-separator`=<SET>:
-    Specify set of characters to be used as row delimeters.
+  * `-m`, `--merge-empty-cells`:
+    By default, fort will print empty cells as they are and will not merge adjacent delimeters into a single one; this option disables this behavior.
 
-  * `-s` <SET>, `--separator`=<SET>:
-    Specify set of characters to be used as field delimeters.
+  * `-s` <SET>, `--col-separator`=<SET>:
+    Specify set of characters to be used as column delimeters.
+
+  * `-S` <SET>, `--row-separator`=<SET>:
+    Specify set of characters to be used as row delimeters.
 
   * `-v`, `--version`:
     Display version information and exit.
