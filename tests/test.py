@@ -631,7 +631,7 @@ for test_suite in test_suites:
         if "beforeScript" in test_case:
             os.system(test_case["beforeScript"])
 
-        process = Popen(["./fort"] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+        process = Popen(["../fort"] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
         (output_b, err) = process.communicate(input=test_case["input"])
 
         if "exitCode" in test_case:

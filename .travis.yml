@@ -11,6 +11,7 @@ matrix:
 
 script:
   - make
+  - cd  tests
   - ./test.py
 
 
