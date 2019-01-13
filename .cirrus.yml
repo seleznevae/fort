@@ -4,9 +4,11 @@ freebsd_instance:
 main_task:
   script:
     - uname -a
+    - yes | pkg install git
+
     - ls
     - cc --version
     - c++ --version
-    
+
     - git submodule init
     - git submodule update
