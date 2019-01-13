@@ -12,3 +12,7 @@ main_task:
 
     - git submodule init
     - git submodule update
+
+    - make
+    - cd  tests
+    - ./test.py
