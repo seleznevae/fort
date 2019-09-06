@@ -31,9 +31,9 @@ static void exit_with_sys_error()
 #define COL_SEPARATOR "|"
 #define ROW_SEPARATOR "\n"
 
-struct ft_border_style * get_border_style(const char *str)
+const struct ft_border_style * get_border_style(const char *str)
 {
-    struct ft_border_style *const border_styles[] = {
+    const struct ft_border_style *const border_styles[] = {
         FT_BASIC_STYLE,
         FT_BASIC2_STYLE,
         FT_SIMPLE_STYLE,
@@ -114,7 +114,7 @@ static struct header_index * set_header_indexes(char *indexes_str)
 }
 
 struct global_opts_t {
-    struct ft_border_style *border_style;
+    const struct ft_border_style *border_style;
     int dummy;
     const char *col_separator;
     const char *row_separator;
