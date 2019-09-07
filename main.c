@@ -5,9 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <wchar.h>
-#include <locale.h>
-#include <iconv.h>
 #include "fort.h"
 
 static void exit_with_error(const char *message)
@@ -175,43 +172,6 @@ const char HELP_STRING[] =
     "  -v, --version                            output version information and exit\n";
 
 
-#ifdef FT_HAVE_WCHAR
-wchar_t *utf8_str_to_wchar_str(char *beg, char *end)
-{
-    iconv_t cd = iconv_open("WCHAR_T", "UTF-8");
-    if (cd == (iconv_t)-1) {
-        exit_with_error("internal error: iconv_open");
-    }
-
-    char *inbuf = beg;
-    size_t inbytesleft = end - beg;
-
-    static wchar_t *wchar_str = NULL;
-    static size_t sz = 0;
-    if (wchar_str == NULL || sz < inbytesleft) {
-        sz = 2 * inbytesleft + 1; /* multiply by 2 - for safety */
-        wchar_str = malloc(sz * sizeof(wchar_t));
-        if (wchar_str == NULL)
-            exit_with_error("Not enough memory");
-    }
-    memset((void*)wchar_str, 0, sz * sizeof(wchar_t));
-    char *outbuf = (char*)wchar_str;
-    size_t outbytesleft = sz * sizeof(wchar_t);
-
-    size_t ir = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
-    if (ir == (size_t)-1) {
-        exit_with_error("internal error: iconv");
-    }
-    if (inbytesleft) {
-        exit_with_error("internal error: iconv in bytes left");
-    }
-    
-    iconv_close(cd);
-    return wchar_str;
-}
-#endif
-
-
 char *get_next_line(FILE *fin, const char *sep_set)
 {
     static size_t size = 1024;
@@ -360,11 +320,7 @@ int main(int argc, char *argv[])
                 break;
             } else if (*end == '\0') {
                 if (beg != end || !global_opts.merge_empty_cells) {
-#ifdef FT_HAVE_WCHAR
-                    ft_wwrite_ln(table, utf8_str_to_wchar_str(beg, end));
-#else
-                    ft_write_ln(table, beg);
-#endif
+                    ft_u8write_ln(table, beg);
                 } else {
                     ft_ln(table);
                 }
@@ -374,11 +330,7 @@ int main(int argc, char *argv[])
             *end = '\0';
 
             if (beg != end || !global_opts.merge_empty_cells) {
-#ifdef FT_HAVE_WCHAR
-                ft_wwrite(table, utf8_str_to_wchar_str(beg, end));
-#else
-                ft_write(table, beg);
-#endif
+                ft_u8write(table, beg);
             }
 
             ++end;
@@ -386,23 +338,11 @@ int main(int argc, char *argv[])
         }
     }
 
-
-#ifdef FT_HAVE_WCHAR
-    setlocale(LC_CTYPE, "");
-    /* Convert table to string and print */
-    const wchar_t *str = ft_to_wstring(table);
-    if (str == NULL)
-        exit_with_error("Internal error");
-    fwprintf(stdout, L"%ls", str);
-#else
-    /* Convert table to string and print */
-    const char *str = ft_to_string(table);
+    const char *str = ft_to_u8string(table);
     if (str == NULL)
         exit_with_error("Internal error");
     printf("%s", str);
-#endif
 
     ft_destroy_table(table);
-
     return status;
 }

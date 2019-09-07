@@ -70,17 +70,61 @@ input_utf8_test_suite = {
 "name": "Input UTF-8 tests",
 "scenarios": [
 {
-"name": "input from file",
-"args": ["-b", "basic", "tmp_file"],
-"beforeScript": "echo  'Мама|мыла\nРа|мумумумумум' > tmp_file",
-"input": "",
+"name": "String in french",
+"args": ["-b", "basic", "-"],
+"input": '''\
+Voyez le brick|géant que
+j’examine près du|wharf
+''',
 "output": u'''\
-+------+-------------+
-| Мама | мыла        |
-| Ра   | мумумумумум |
-+------+-------------+
++-------------------+-----------+
+| Voyez le brick    | géant que |
+| j’examine près du | wharf     |
++-------------------+-----------+
 '''
-}
+},
+{
+"name": "String in german",
+"args": ["-b", "basic", "-"],
+"input": '''\
+Victor jagt zwölf Boxkämpfer quer über den großen|Falsches Üben von Xylophonmusik quält jeden größeren Zwerg
+Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
+''',
+"output": u'''\
++-------------------------------------------------------------+------------------------------------------------------------+
+| Victor jagt zwölf Boxkämpfer quer über den großen           | Falsches Üben von Xylophonmusik quält jeden größeren Zwerg |
+| Franz jagt im komplett verwahrlosten Taxi quer durch Bayern |                                                            |
++-------------------------------------------------------------+------------------------------------------------------------+
+'''
+},
+{
+"name": "String in greek",
+"args": ["-b", "basic", "-"],
+"input": '''\
+Ταχίστη αλώπηξ βαφής ψημένη γη|δρασκελίζει υπέρ νωθρού κυνός Takhístè alôpèx vaphês psèménè gè
+Ξεσκεπάζω τὴν ψυχοφθόρα βδελυγμία|Xeskepazó tin psychofthóra vdelygmía
+''',
+"output": u'''\
++-----------------------------------+-----------------------------------------------------------------+
+| Ταχίστη αλώπηξ βαφής ψημένη γη    | δρασκελίζει υπέρ νωθρού κυνός Takhístè alôpèx vaphês psèménè gè |
+| Ξεσκεπάζω τὴν ψυχοφθόρα βδελυγμία | Xeskepazó tin psychofthóra vdelygmía                            |
++-----------------------------------+-----------------------------------------------------------------+
+'''
+},
+{
+"name": "String in russian",
+"args": ["-b", "basic", "-"],
+"input": '''\
+Съешь же ещё|этих мягких французских булок
+да выпей|чаю
+''',
+"output": u'''\
++--------------+-------------------------------+
+| Съешь же ещё | этих мягких французских булок |
+| да выпей     | чаю                           |
++--------------+-------------------------------+
+'''
+},
 ]}
 test_suites.append(input_utf8_test_suite)
 
