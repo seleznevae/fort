@@ -71,7 +71,7 @@ input_utf8_test_suite = {
 "scenarios": [
 {
 "name": "String in french",
-"args": ["-b", "basic", "-"],
+"args": ["-b", "basic"],
 "input": '''\
 Voyez le brick|géant que
 j’examine près du|wharf
@@ -85,7 +85,7 @@ j’examine près du|wharf
 },
 {
 "name": "String in german",
-"args": ["-b", "basic", "-"],
+"args": ["-b", "basic"],
 "input": '''\
 Victor jagt zwölf Boxkämpfer quer über den großen|Falsches Üben von Xylophonmusik quält jeden größeren Zwerg
 Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
@@ -99,7 +99,7 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 },
 {
 "name": "String in greek",
-"args": ["-b", "basic", "-"],
+"args": ["-b", "basic"],
 "input": '''\
 Ταχίστη αλώπηξ βαφής ψημένη γη|δρασκελίζει υπέρ νωθρού κυνός Takhístè alôpèx vaphês psèménè gè
 Ξεσκεπάζω τὴν ψυχοφθόρα βδελυγμία|Xeskepazó tin psychofthóra vdelygmía
@@ -112,8 +112,22 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 '''
 },
 {
+"name": "String in japanese",
+"args": ["-b", "basic"],
+"input": '''\
+いろはにほへと ちりぬるを わかよ|たれそ つねならむ うゐのおくやま けふこ
+色は匂へど 散りぬるを 我が世誰ぞ 常ならむ 有|為の奥山 今日越えて 浅き夢見じ 酔ひもせず
+''',
+"output": u'''\
++--------------------------+------------------------+
+| いろはにほへと ちりぬるを わかよ        | たれそ つねならむ うゐのおくやま けふこ  |
+| 色は匂へど 散りぬるを 我が世誰ぞ 常ならむ 有 | 為の奥山 今日越えて 浅き夢見じ 酔ひもせず |
++--------------------------+------------------------+
+'''
+},
+{
 "name": "String in russian",
-"args": ["-b", "basic", "-"],
+"args": ["-b", "basic"],
 "input": '''\
 Съешь же ещё|этих мягких французских булок
 да выпей|чаю
