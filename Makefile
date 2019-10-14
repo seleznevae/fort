@@ -41,4 +41,4 @@ clean:
 	$(RM) -rf $(BIN) $(DOCS)
 
 
-.PHONY: all clean
+.PHONY: all clean test
