@@ -21,7 +21,9 @@ INCFLAGS += -I${LIBFORT_PATH}
 $(BIN): ${SRC} ${HDRS}
 	${CC} ${CFLAGS} ${SRC} ${INCFLAGS} -o $(BIN)
 
-ifeq (, $(shell which ${RONN}))
+
+RONN_DEFINED := $(shell command -v ${RONN} 2> /dev/null)
+ifndef RONN_DEFINED
 $(warning "`${RONN}` utility is not found. Generation of docs is disabled.")
 DOCS = 
 else
