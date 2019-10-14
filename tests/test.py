@@ -365,6 +365,20 @@ separator_test_suite = {
 +---+---+
 '''
 },
+{
+"name": "Spaces and tabs separators test",
+"args": ["-b", "basic", "--col-separator= 	"],
+"input": '''\
+1	2 3
+1 456	78	99
+''' ,
+"output": '''\
++---+-----+----+----+
+| 1 | 2   | 3  |    |
+| 1 | 456 | 78 | 99 |
++---+-----+----+----+
+'''
+},
 ]}
 test_suites.append(separator_test_suite)
 

@@ -1,12 +1,42 @@
-all: fort
+CFLAGS    += -g3 -Wall -Wextra -Werror
+INCFLAGS  =
 
-LIBFORT_PATH=./libfort/lib
-LIBFORT_SRC=${LIBFORT_PATH}/fort.c
-LIBFORT_HDR=${LIBFORT_PATH}/fort.h
+RONN := ronn
+BIN  := fort
+DOCS := ./docs/fort.1 ./docs/fort.1.html
 
+SRC  := main.c
+HDRS := 
 
-fort: main.c ${LIBFORT_SRC} ${LIBFORT_HDR}
-	${CC} -DFT_CONGIG_DISABLE_WCHAR -g3 -Wall -Wextra -Werror main.c ${LIBFORT_SRC} -I${LIBFORT_PATH} -o fort
+LIBFORT_PATH   = ./libfort/lib
+LIBFORT_SRC    = ${LIBFORT_PATH}/fort.c
+LIBFORT_HDR    = ${LIBFORT_PATH}/fort.h
+LIBFORT_CFLAGS = -DFT_CONGIG_DISABLE_WCHAR
+
+CFLAGS   += ${LIBFORT_CFLAGS}
+SRC      += ${LIBFORT_SRC}
+HDRS     += ${LIBFORT_HDR}
+INCFLAGS += -I${LIBFORT_PATH}
+
+$(BIN): ${SRC} ${HDRS}
+	${CC} ${CFLAGS} ${SRC} ${INCFLAGS} -o $(BIN)
+
+ifeq (, $(shell which ${RONN}))
+$(warning "`${RONN}` utility is not found. Generation of docs is disabled.")
+DOCS = 
+else
+$(DOCS): docs/fort.md
+	ronn ./docs/fort.md
+endif
+docs: $(DOCS)
+
+test: $(BIN) 
+	cd tests ; ./test.py 
+
+all: $(BIN) docs test
 
 clean:
-	rm -f fort
+	$(RM) -rf $(BIN) $(DOCS)
+
+
+.PHONY: all clean
