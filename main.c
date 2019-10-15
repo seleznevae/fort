@@ -25,7 +25,7 @@ static void exit_with_sys_error()
 
 #define BUFFER_SIZE (1 << 10)
 #define MAX_BUFFER_SIZE (1 << 16)
-#define COL_SEPARATOR "|"
+#define COL_SEPARATOR ","
 #define ROW_SEPARATOR "\n"
 
 const struct ft_border_style * get_border_style(const char *str)

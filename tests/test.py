@@ -23,7 +23,7 @@ input_test_suite = {
 {
 "name": "input from file",
 "args": ["-b", "basic", "tmp_file"],
-"beforeScript": "echo  '1|3\n4|5' > tmp_file",
+"beforeScript": "echo  '1,3\n4,5' > tmp_file",
 "input": "",
 "output": '''\
 +---+---+
@@ -37,8 +37,8 @@ input_test_suite = {
 "name": "input from stdin",
 "args": ["-b", "basic"],
 "input": '''\
-1|3
-4|5
+1,3
+4,5
 ''' ,
 "output": '''\
 +---+---+
@@ -51,8 +51,8 @@ input_test_suite = {
 "name": "input from stdin after dash",
 "args": ["-b", "basic", "-"],
 "input": '''\
-1|3
-4|5
+1,3
+4,5
 ''' ,
 "output": '''\
 +---+---+
@@ -74,7 +74,7 @@ input_utf8_test_suite = {
 "scenarios": [
 {
 "name": "String in chinese",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 視野無限廣|窗外有藍天
 微風迎客，軟語伴茶|中国智造
@@ -88,7 +88,7 @@ input_utf8_test_suite = {
 },
 {
 "name": "String in french",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 Voyez le brick|géant que
 j’examine près du|wharf
@@ -102,7 +102,7 @@ j’examine près du|wharf
 },
 {
 "name": "String in german",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 Victor jagt zwölf Boxkämpfer quer über den großen|Falsches Üben von Xylophonmusik quält jeden größeren Zwerg
 Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
@@ -116,7 +116,7 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 },
 {
 "name": "String in greek",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 Ταχίστη αλώπηξ βαφής ψημένη γη|δρασκελίζει υπέρ νωθρού κυνός Takhístè alôpèx vaphês psèménè gè
 Ξεσκεπάζω τὴν ψυχοφθόρα βδελυγμία|Xeskepazó tin psychofthóra vdelygmía
@@ -130,7 +130,7 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 },
 {
 "name": "String in japanese",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 いろはにほへと ちりぬるを わかよ|たれそ つねならむ うゐのおくやま けふこ
 色は匂へど 散りぬるを 我が世誰ぞ 常ならむ 有|為の奥山 今日越えて 浅き夢見じ 酔ひもせず
@@ -144,7 +144,7 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 },
 {
 "name": "String in korean",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 키스의|고유조건은 입술끼리
 만나야 하고 특별한|기술은 필요치 않다
@@ -158,7 +158,7 @@ Franz jagt im komplett verwahrlosten Taxi quer durch Bayern
 },
 {
 "name": "String in russian",
-"args": ["-b", "basic"],
+"args": ["-b", "basic", "--col-separator", "|"],
 "input": '''\
 Съешь же ещё|этих мягких французских булок
 да выпей|чаю
@@ -183,7 +183,7 @@ long_input_test_suite = {
 "scenarios": [
 {
 "name": "long input",
-"args": [],
+"args": ["--col-separator", "|"],
 "input": '{}|{}\n{}|{}'.format(big_string_1,big_string_2,big_string_3,big_string_4) ,
 "output": ' {}  {}  \n {}   {} \n'.format(big_string_1,big_string_2,big_string_3,big_string_4) 
 }
@@ -199,8 +199,8 @@ simple_test_suite = {
 "name": "simple test",
 "args": ["-b", "basic"],
 "input": '''\
-1|3
-4|5
+1,3
+4,5
 ''' ,
 "output": '''\
 +---+---+
@@ -213,10 +213,10 @@ simple_test_suite = {
 "name": "simple test 2",
 "args": ["-b", "basic"],
 "input": '''\
-1|3|5
+1,3,5
 
-4|5
-1|22|33|66
+4,5
+1,22,33,66
 ''' ,
 "output": '''\
 +---+----+----+----+
@@ -238,10 +238,10 @@ merge_empty_cell_test_suite = {
 "name": "Short option test",
 "args": ["-b", "basic", "-m"],
 "input": '''\
-1|||5
-||6
-4|5
-1|22||66
+1,,,5
+,,6
+4,5
+1,22,,66
 ''' ,
 "output": '''\
 +---+----+----+
@@ -256,10 +256,10 @@ merge_empty_cell_test_suite = {
 "name": "Short option test",
 "args": ["-b", "basic", "--merge-empty-cell"],
 "input": '''\
-|||5
-||6
-4|5
-1|22||66
+,,,5
+,,6
+4,5
+1,22,,66
 ''' ,
 "output": '''\
 +---+----+----+
@@ -281,11 +281,11 @@ ignore_empty_test_suite = {
 "name": "Short option test",
 "args": ["-b", "basic", "-e"],
 "input": '''\
-1|3|5
+1,3,5
 
-4|5
+4,5
 
-1|22|33|66
+1,22,33,66
 ''' ,
 "output": '''\
 +---+----+----+----+
@@ -299,11 +299,11 @@ ignore_empty_test_suite = {
 "name": "Long option test",
 "args": ["-b", "basic", "--ignore-empty-lines"],
 "input": '''\
-1|3|5
+1,3,5
 
-4|5
+4,5
 
-1|22|33|66
+1,22,33,66
 ''' ,
 "output": '''\
 +---+----+----+----+
@@ -390,7 +390,7 @@ row_separator_test_suite = {
 {
 "name": "simple row separator test",
 "args": ["-b", "basic", "-S", ";"],
-"input": '''1|3;4|5;;5|6|7''' ,
+"input": '''1,3;4,5;;5,6,7''' ,
 "output": '''\
 +---+---+---+
 | 1 | 3 |   |
@@ -403,7 +403,7 @@ row_separator_test_suite = {
 {
 "name": "Multiple row separators test",
 "args": ["-b", "basic", "--row-separator=;:&"],
-"input": '''1|3;4|5:&5|6|7''' ,
+"input": '''1,3;4,5:&5,6,7''' ,
 "output": '''\
 +---+---+---+
 | 1 | 3 |   |
@@ -426,13 +426,13 @@ header_test_suite = {
 "name": "simple header",
 "args": ["-b", "basic", "--header=0,3"],
 "input": '''\
-1|2
-3|4
-5|6
-7|8
-9|0
-1|2
-3|4
+1,2
+3,4
+5,6
+7,8
+9,0
+1,2
+3,4
 ''' ,
 "output": '''\
 +---+---+
@@ -461,9 +461,9 @@ border_styles_test_suite = {
 "name": "basic border style",
 "args": ["-b", "basic", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
 +---+---+
@@ -478,9 +478,9 @@ border_styles_test_suite = {
 "name": "basic2 border style",
 "args": ["-b", "basic2", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
 +---+---+
@@ -496,9 +496,9 @@ border_styles_test_suite = {
 "name": "simple border style",
 "args": ["-b", "simple", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
  1   2 
@@ -511,9 +511,9 @@ border_styles_test_suite = {
 "name": "plain border style",
 "args": ["-b", "plain", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
 -------
@@ -527,9 +527,9 @@ border_styles_test_suite = {
 "name": "dot border style",
 "args": ["-b", "dot", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
 .........
@@ -544,9 +544,9 @@ border_styles_test_suite = {
 "name": "empty border style",
 "args": ["-b", "empty", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
  1  2 
@@ -558,9 +558,9 @@ border_styles_test_suite = {
 "name": "empty2 border style",
 "args": ["-b", "empty2", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": '''\
          
@@ -574,9 +574,9 @@ border_styles_test_suite = {
 "name": "solid border style",
 "args": ["-b", "solid", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ┌───┬───┐
@@ -591,9 +591,9 @@ border_styles_test_suite = {
 "name": "solid_round border style",
 "args": ["-b", "solid_round", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ╭───┬───╮
@@ -608,9 +608,9 @@ border_styles_test_suite = {
 "name": "nice border style",
 "args": ["-b", "nice", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ╔═══╦═══╗
@@ -625,9 +625,9 @@ border_styles_test_suite = {
 "name": "double border style",
 "args": ["-b", "double", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ╔═══╦═══╗
@@ -642,9 +642,9 @@ border_styles_test_suite = {
 "name": "double2 border style",
 "args": ["-b", "double2", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ╔═══╤═══╗
@@ -660,9 +660,9 @@ border_styles_test_suite = {
 "name": "bold border style",
 "args": ["-b", "bold", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ┏━━━┳━━━┓
@@ -677,9 +677,9 @@ border_styles_test_suite = {
 "name": "bold2 border style",
 "args": ["-b", "bold2", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ┏━━━┯━━━┓
@@ -695,9 +695,9 @@ border_styles_test_suite = {
 "name": "frame border style",
 "args": ["-b", "frame", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": u'''\
 ▛▀▀▀▀▀▀▀▜
@@ -712,9 +712,9 @@ border_styles_test_suite = {
 "name": "incorrect border style",
 "args": ["-b", "abraCadabra", "--header=0"],
 "input": '''\
-1|2
-3|4
-5|6
+1,2
+3,4
+5,6
 ''' ,
 "output": "fort: error: Invalid border style\n",
 "exitCode": 1

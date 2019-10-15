@@ -56,33 +56,27 @@ Frequently used sections:
     By default, fort will print empty cells as they are and will not merge adjacent delimeters into a single one; this option disables this behavior.
 
   * `-s` <SET>, `--col-separator`=<SET>:
-    Specify set of characters to be used as column delimeters.
+    Specify set of characters to be used as column delimeters. Default column delimeters set is ','.
 
   * `-S` <SET>, `--row-separator`=<SET>:
-    Specify set of characters to be used as row delimeters.
+    Specify set of characters to be used as row delimeters. Default column delimeters set is '\n'.
 
   * `-v`, `--version`:
     Display version information and exit.
 
   * You can put whatever you *want* here, really:
     Nesting and paragraph spacing are respected.
-## SYNTAX
-## ENVIRONMENT
-## RETURN VALUES
-## STANDARDS
-## SECURITY CONSIDERATIONS
-## BUGS
-## HISTORY
+
+
 ## AUTHOR
 
 Written by Anton Seleznev.
 
 ## COPYRIGHT
 
-Copyright (C) 2018 Anton Seleznev
-License MIT ???
+Copyright (C) 2018 Anton Seleznev.
+License MIT <https://opensource.org/licenses/MIT>.
 
 ## SEE ALSO
 
-ronn-format(7), manpages(5), man(1), roff(7), groff(1), markdown(7)
-change this list!!
+awk(1), colrm(1), column(1), paste(1)
