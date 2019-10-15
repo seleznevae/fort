@@ -11,9 +11,7 @@ Fort converts its input into the formatted text table.
 
 With no FILE, or when FILE is -, read standard input.
 
-The input is broken into lines, default line separator = "\n", and lines are broken into fields, default field separator = "|". Fields content is then inserted into the cells of the resulting table.
-
-All lines of the input are threated equally. To 
+The input is broken into lines, default line separator is "\n", and lines are broken into fields, default field separator is ",". Fields content is then inserted into the cells of the resulting table. All lines of the input are threated equally. To make a particular line emphasized like a header use `--header` option.
 
 
 A normal paragraph. This can span multiple lines and is terminated with two
