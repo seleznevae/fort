@@ -1,8 +1,10 @@
 #include <errno.h>
 #include <getopt.h>
+#include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "fort.h"
@@ -98,7 +100,6 @@ static struct header_index * set_header_indexes(char *indexes_str)
             int index = strtoll (str, &endptr, 10);
             if (*endptr != '\0') {
                 exit_with_error("Invalid header row number");  
-                // exit_with_error("Invalid header row number: %s", str);  
             }
             struct header_index * new_header_index = (struct header_index *)malloc(sizeof(struct header_index));
             new_header_index->index = index;
@@ -110,15 +111,67 @@ static struct header_index * set_header_indexes(char *indexes_str)
     return header_indexes;
 }
 
+struct match_item {
+    regex_t regex;
+    struct match_item *next;
+};
+
+static struct match_item *create_match_item(const char *re_str)
+{
+    struct match_item *mi = calloc(1, sizeof(struct match_item));
+    if (!mi)
+        exit_with_sys_error("Not enought memory");
+    if (regcomp(&mi->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
+        exit_with_sys_error("Invalid regular expression");
+    
+    return mi;
+}
+
+static void mark_if_match_found(ft_table_t *table, struct match_item *items_list, const char *str)
+{
+    struct match_item *item = items_list;
+    while (item) {
+        if (!regexec(&item->regex, str, 0, NULL, 0)) {
+            ft_set_cell_prop(table, FT_CUR_ROW, FT_CUR_COLUMN, FT_CPROP_CONT_FG_COLOR, FT_COLOR_RED);
+        }
+        item = item->next;
+    }
+}
+
 struct global_opts_t {
     const struct ft_border_style *border_style;
     int dummy;
     const char *col_separator;
     const char *row_separator;
     struct header_index *header_indexes;
+    struct match_item *match_items;
     int ignore_empty_lines;
     int merge_empty_cells;
 } global_opts;
+
+void free_options(struct global_opts_t *options)
+{
+    /* Free headers */
+    struct header_index *hi = options->header_indexes;
+    struct header_index *hi_next = NULL;
+    while (hi) {
+        hi_next = hi->next;
+        free(hi);
+        hi = hi_next;
+    }
+    options->header_indexes = NULL;
+
+    /* Free match items */
+    struct match_item *mi = options->match_items;
+    struct match_item *mi_next = NULL;
+    while (mi) {
+        mi_next = mi->next;
+        regfree(&mi->regex);
+        free(mi);
+        mi = mi_next;
+    }
+    options->match_items = NULL;
+}
 
 static const char *opt_string = "b:ehms:S:v";
 
@@ -129,27 +182,32 @@ void set_default_options()
     global_opts.col_separator = COL_SEPARATOR;
     global_opts.row_separator = ROW_SEPARATOR;
     global_opts.header_indexes = NULL;
+    global_opts.match_items = NULL;
     global_opts.ignore_empty_lines = 0;
     global_opts.merge_empty_cells = 0;
 }
 
 static int header_enabled = 0;
+static int match_items_enabled = 0;
 
-
-#define OPT_BORDER_STYLE_INDEX       0
-#define OPT_IGNORE_EMPTY_INDEX       1
-#define OPT_HEADER_INDEX             2
-#define OPT_HELP_INDEX               3
-#define OPT_MERGE_EMPTY_CELL_INDEX   4
-#define OPT_COL_SEPARATOR_INDEX      5
-#define OPT_ROW_SEPARATOR_INDEX      6
-#define OPT_VERSION_INDEX            7
+enum option_index {
+    OPT_BORDER_STYLE_INDEX = 0,
+    OPT_IGNORE_EMPTY_INDEX,
+    OPT_HEADER_INDEX,
+    OPT_HELP_INDEX,
+    OPT_MATCH_INDEX,
+    OPT_MERGE_EMPTY_CELL_INDEX,
+    OPT_COL_SEPARATOR_INDEX,
+    OPT_ROW_SEPARATOR_INDEX,
+    OPT_VERSION_INDEX
+};
 
 static const struct option long_opts[] = {
     { "border-style", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
+    { "match", optional_argument, &match_items_enabled, 1},
     { "merge-empty-cell", no_argument, NULL, 'm' },
     { "col-separator", required_argument, NULL, 's' },
     { "row-separator", required_argument, NULL, 'S' },
@@ -167,6 +225,7 @@ const char HELP_STRING[] =
     "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
     "  -h, --help                               print help and exit\n"
     "  -m, --merge-empty-cell                   merge empty cells\n"
+    "  --match=<re>                             match regex\n"
     "  -s <set>, --col-separator=<set>          specify set of characters to be used to delimit columns\n"
     "  -S <set>, --row-separator=<set>          specify set of characters to be used to delimit rows\n"
     "  -v, --version                            output version information and exit\n";
@@ -245,6 +304,8 @@ int main(int argc, char *argv[])
             case 0:
                 if (longindex == OPT_HEADER_INDEX) {
                     global_opts.header_indexes = set_header_indexes(optarg);
+                } else if (longindex == OPT_MATCH_INDEX) {
+                    global_opts.match_items = create_match_item(optarg);
                 } else {
                     exit_with_error("Invalid option"); 
                 }
@@ -320,16 +381,17 @@ int main(int argc, char *argv[])
                 break;
             } else if (*end == '\0') {
                 if (beg != end || !global_opts.merge_empty_cells) {
+                    mark_if_match_found(table, global_opts.match_items, beg);
                     ft_u8write_ln(table, beg);
                 } else {
                     ft_ln(table);
                 }
-
                 break;
             }
             *end = '\0';
 
             if (beg != end || !global_opts.merge_empty_cells) {
+                mark_if_match_found(table, global_opts.match_items, beg);
                 ft_u8write(table, beg);
             }
 
@@ -338,11 +400,12 @@ int main(int argc, char *argv[])
         }
     }
 
-    const char *str = ft_to_u8string(table);
+    const char *str = (const char *)ft_to_u8string(table);
     if (str == NULL)
         exit_with_error("Internal error");
     printf("%s", str);
 
     ft_destroy_table(table);
+    free_options(&global_opts);
     return status;
 }
