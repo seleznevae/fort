@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import subprocess
-from subprocess import Popen, PIPE, STDOUT
-from subprocess import call
+import argparse
+from subprocess import call, Popen, PIPE, STDOUT
 import sys
 import os
 
@@ -796,36 +795,40 @@ action_test_suite = {
 ]}
 test_suites.append(action_test_suite)
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Run fort tests.')
+    parser.add_argument('--bin-dir', help='Directory with fort executable')
+    args = parser.parse_args()
 
-for test_suite in test_suites:
-    print "Running {}".format(test_suite["name"])
-    for test_case in test_suite["scenarios"]:
-        print "  Executing {}".format(test_case["name"])
-        if "beforeScript" in test_case:
-            os.system(test_case["beforeScript"])
+    for test_suite in test_suites:
+        print "Running {}".format(test_suite["name"])
+        for test_case in test_suite["scenarios"]:
+            print "  Executing {}".format(test_case["name"])
+            if "beforeScript" in test_case:
+                os.system(test_case["beforeScript"])
 
-        process = Popen(["../fort"] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-        (output_b, err) = process.communicate(input=test_case["input"])
+            process = Popen(["{}/fort".format(args.bin_dir)] + test_case["args"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+            (output_b, err) = process.communicate(input=test_case["input"])
 
-        if "exitCode" in test_case:
-            expCode = test_case["exitCode"]
-        else:
-            expCode = 0
-        if expCode != process.returncode:
-            print "Invalid return code: expected {}, recieved {}".format(expCode, process.returncode)
+            if "exitCode" in test_case:
+                expCode = test_case["exitCode"]
+            else:
+                expCode = 0
+            if expCode != process.returncode:
+                print "Invalid return code: expected {}, recieved {}".format(expCode, process.returncode)
 
-        if "afterScript" in test_case:
-            os.system(test_case["afterScript"])
+            if "afterScript" in test_case:
+                os.system(test_case["afterScript"])
 
-        if err:
-            print "Error encountered: {}".format(err)
-        output = output_b.decode('utf-8')
-        if output != test_case["output"]:
-            print ' Test Failed'
-            print '  Input'
-            print test_case["input"]
-            print '  Expected'
-            print test_case["output"]
-            print '  Recieved'
-            print output
-            sys.exit("Test failed!")
+            if err:
+                print "Error encountered: {}".format(err)
+            output = output_b.decode('utf-8')
+            if output != test_case["output"]:
+                print ' Test Failed'
+                print '  Input'
+                print test_case["input"]
+                print '  Expected'
+                print test_case["output"]
+                print '  Recieved'
+                print output
+                sys.exit("Test failed!")

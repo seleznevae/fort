@@ -10,10 +10,8 @@ matrix:
         - git submodule update
 
 script:
-  - make
-  - cd  tests
-  - ./test.py
-
+  - cmake -H. -B_build
+  - cmake --build _build -- 
 
 
 

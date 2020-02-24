@@ -4,7 +4,7 @@ freebsd_instance:
 main_task:
   script:
     - uname -a
-    - yes | pkg install git gmake
+    - yes | pkg install git gmake cmake
 
     - ls
     - cc --version
@@ -13,4 +13,5 @@ main_task:
     - git submodule init
     - git submodule update
 
-    - gmake all
+    - cmake -H. -B_build
+    - cmake --build _build -- 
