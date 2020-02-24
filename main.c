@@ -164,7 +164,7 @@ void add_match_item(struct match_item **head, const char *action_str)
     const char *endptr = NULL;
     struct match_item *mi = match_item_create();
     if (!mi)
-        exit_with_sys_error("Not enough memory");
+        exit_with_error("Not enough memory");
 
     if (strlen(action_str) == 0)
         exit_with_error("Ivalid format of match expession");
@@ -203,7 +203,7 @@ void add_match_item(struct match_item **head, const char *action_str)
         re_str_len = endptr - action_str;
         re_str = malloc(re_str_len + 1);
         if (!re_str)
-            exit_with_sys_error("Not enough memory");
+            exit_with_error("Not enough memory");
         re_str[re_str_len] = '\0';
         strncpy(re_str, action_str, re_str_len);
 
