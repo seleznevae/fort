@@ -722,6 +722,79 @@ border_styles_test_suite = {
 ]}
 test_suites.append(border_styles_test_suite)
 
+###############  Mark test cases  ##################
+
+mark_test_suite = {
+"name": "Mark tests",
+"scenarios": [
+{
+"name": "Match by line",
+"args": ["-b", "basic", "--match=1red"],
+"input": '''\
+0,1
+2,3
+4,5
+''' ,
+"output": u'''\
++---+---+
+| 0 | 1 |
+| \x1b[31m2\x1b[0m | \x1b[31m3\x1b[0m |
+| 4 | 5 |
++---+---+
+'''
+},
+{
+"name": "Match by range of lines",
+"args": ["-b", "basic", "--match=1-2red"],
+"input": '''\
+0,1
+2,3
+4,5
+6,7
+''' ,
+"output": u'''\
++---+---+
+| 0 | 1 |
+| \x1b[31m2\x1b[0m | \x1b[31m3\x1b[0m |
+| \x1b[31m4\x1b[0m | \x1b[31m5\x1b[0m |
+| 6 | 7 |
++---+---+
+'''
+},
+{
+"name": "Match by ragex",
+"args": ["-b", "basic", "--match=/.*33.*/red"],
+"input": '''\
+0,1
+2,1335
+4,5
+''' ,
+"output": u'''\
++---+------+
+| 0 | 1    |
+| 2 | \x1b[31m1335\x1b[0m |
+| 4 | 5    |
++---+------+
+'''
+},
+{
+"name": "Match by lines and regex",
+"args": ["-b", "basic", "--match=1/.*33.*/red"],
+"input": '''\
+0,1335
+2,1335
+4,5
+''' ,
+"output": u'''\
++---+------+
+| 0 | 1335 |
+| 2 | \x1b[31m1335\x1b[0m |
+| 4 | 5    |
++---+------+
+'''
+},
+]}
+test_suites.append(mark_test_suite)
 
 
 for test_suite in test_suites:

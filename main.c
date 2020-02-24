@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
 #include <regex.h>
@@ -112,28 +113,128 @@ static struct header_index * set_header_indexes(char *indexes_str)
 }
 
 struct match_item {
-    regex_t regex;
     struct match_item *next;
+    /* Regex to match */
+    regex_t regex;
+    int re_set;
+    /* Property to setup */
+    int property;
+    int property_value;
+    /* Range of cells to match (both ends included) */
+    long int row_beg;
+    long int row_end;
 };
 
-static struct match_item *create_match_item(const char *re_str)
+enum ft_color string_to_color(const char *color, size_t sz)
+{
+    if (strncmp(color, "black", sz) == 0)
+        return FT_COLOR_BLACK;
+    if (strncmp(color, "red", sz) == 0)
+        return FT_COLOR_RED;
+    if (strncmp(color, "green", sz) == 0)
+        return FT_COLOR_GREEN;
+    if (strncmp(color, "yellow", sz) == 0)
+        return FT_COLOR_YELLOW;
+    if (strncmp(color, "blue", sz) == 0)
+        return FT_COLOR_BLUE;
+    if (strncmp(color, "magenta", sz) == 0)
+        return FT_COLOR_MAGENTA;
+    if (strncmp(color, "cyan", sz) == 0)
+        return FT_COLOR_CYAN;
+
+    exit_with_error("Ivalid color name");
+    return FT_COLOR_DEFAULT;
+}
+
+struct match_item *match_item_create()
 {
     struct match_item *mi = calloc(1, sizeof(struct match_item));
     if (!mi)
-        exit_with_sys_error("Not enought memory");
-    if (regcomp(&mi->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
-        exit_with_sys_error("Invalid regular expression");
-    
+        return mi;
+    mi->row_beg = -1;
+    mi->row_end = -1;
     return mi;
+}
+
+/* Format of action strings: "(range|/RE/|range/RE/)action" */
+void add_match_item(struct match_item **head, const char *action_str)
+{
+    size_t re_str_len = 0;
+    char* re_str = NULL;
+    const char *endptr = NULL;
+    struct match_item *mi = match_item_create();
+    if (!mi)
+        exit_with_sys_error("Not enough memory");
+
+    if (strlen(action_str) == 0)
+        exit_with_error("Ivalid format of match expession");
+
+    /* Fill range if it is provided */
+    if (isdigit(action_str[0])) {
+        mi->row_beg = strtol(action_str, (char **)&endptr, 10);
+        if (endptr == action_str)
+            exit_with_error("Ivalid format of match expession");
+        mi->row_end = mi->row_beg;
+        action_str = endptr;
+        if (action_str[0] == '-') {
+            ++action_str;
+            mi->row_end = strtol(action_str, (char **)&endptr, 10);
+            if (endptr == action_str)
+                exit_with_error("Ivalid format of match expession");
+            action_str = endptr;
+        }
+    }
+
+    /* Fill RE if it is provided */
+    if (*action_str == '/') {
+        ++action_str;
+        endptr = action_str;
+        again:
+        while (*endptr && *endptr != '/') 
+            endptr++;
+        if (*endptr == '\0')
+            exit_with_error("Ivalid format of match expession");
+        // TODO: add processing of case when \ is escaped itself
+        if (*(endptr - 1) == '\\') {
+            endptr++;
+            goto again;
+        }
+
+        re_str_len = endptr - action_str;
+        re_str = malloc(re_str_len + 1);
+        if (!re_str)
+            exit_with_sys_error("Not enough memory");
+        re_str[re_str_len] = '\0';
+        strncpy(re_str, action_str, re_str_len);
+
+        if (regcomp(&mi->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
+            exit_with_error("Invalid regular expression");
+        action_str = endptr + 1;
+        mi->re_set = 1;
+    }
+
+    mi->property = FT_CPROP_CONT_FG_COLOR;
+    mi->property_value = string_to_color(action_str, strlen(action_str));
+    
+    mi->next = *head;
+    *head = mi;
 }
 
 static void mark_if_match_found(ft_table_t *table, struct match_item *items_list, const char *str)
 {
+    size_t cur_row = ft_cur_row(table);
+
     struct match_item *item = items_list;
     while (item) {
-        if (!regexec(&item->regex, str, 0, NULL, 0)) {
-            ft_set_cell_prop(table, FT_CUR_ROW, FT_CUR_COLUMN, FT_CPROP_CONT_FG_COLOR, FT_COLOR_RED);
+        if (item->row_beg >= 0 && cur_row < (size_t)item->row_beg) 
+            goto next;
+        if (item->row_end >= 0 && cur_row > (size_t)item->row_end) 
+            goto next;
+
+        if (!item->re_set || !regexec(&item->regex, str, 0, NULL, 0)) {
+            ft_set_cell_prop(table, FT_CUR_ROW, FT_CUR_COLUMN, item->property, item->property_value);
         }
+    next:
         item = item->next;
     }
 }
@@ -305,7 +406,7 @@ int main(int argc, char *argv[])
                 if (longindex == OPT_HEADER_INDEX) {
                     global_opts.header_indexes = set_header_indexes(optarg);
                 } else if (longindex == OPT_MATCH_INDEX) {
-                    global_opts.match_items = create_match_item(optarg);
+                    add_match_item(&global_opts.match_items, optarg);
                 } else {
                     exit_with_error("Invalid option"); 
                 }
