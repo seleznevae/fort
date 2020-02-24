@@ -13,30 +13,6 @@ With no FILE, or when FILE is -, read standard input.
 
 The input is broken into lines, default line separator is "\n", and lines are broken into fields, default field separator is ",". Fields content is then inserted into the cells of the resulting table. All lines of the input are threated equally. To make a particular line emphasized like a header use `--header` option.
 
-
-A normal paragraph. This can span multiple lines and is terminated with two
-or more line endings -- just like Markdown.
-
-Inline markup for `code`, `user input`, and **strong** are displayed
-boldface; <variable>, _emphasis_, *emphasis*, are displayed in italics
-(HTML) or underline (roff).
-
-Manual references like sh(1), markdown(7), roff(7), etc. are hyperlinked in
-HTML output.
-
-Link to sections like [STANDARDS][], [SEE ALSO][], or [WITH A DIFFERENT LINK
-TEXT][#SEE-ALSO].
-
-Definition lists:
-
-  * `-a`, `--argument`=[<value>]:
-    One or more paragraphs describing the argument.
-
-  * You can put whatever you *want* here, really:
-    Nesting and paragraph spacing are respected.
-
-Frequently used sections:
-
 ## OPTIONS
   * `-a` <action>, `--action`=<action>:
     Apply action on cells of the output table. Format of actions:
@@ -44,16 +20,16 @@ Frequently used sections:
 
     Examples of setting actions:
 
-    **--action=0magenta** # colorize in magenta cells in the 0th row
+    `--action=0magenta` # colorize in magenta cells in the 0th row
 
-    **--action=1-3green** # colorize in green cells in range from 1st row to 3rd row (both ends included)
+    `--action=1-3green` # colorize in green cells in range from 1st row to 3rd row (both ends included)
 
-    **--action=/go*gle/red** # colorize in red cells that match regex 'go*gle'
+    `--action=/go*gle/red` # colorize in red cells that match regex 'go*gle'
 
-    **--action=3-5/go*gle/yellow** # colorize in yellow cells in range from 3rd row to 5th row (both ends included) that match regex 'go*gle'
+    `--action=3-5/go*gle/yellow` # colorize in yellow cells in range from 3rd row to 5th row (both ends included) that match regex 'go*gle'
 
   * `-b` <name>, `--border-style`=<name>:
-    Set border style of the output table. Available border style names: **basic**, **basic2**, **simple**, **plain**, **dot**, **empty** (default style), **empty2**, **solid**, **solid_round**, **nice**, **double**,      **double2**, **bold**, **bold2**, **frame**.
+    Set border style of the output table. Available border style names: *basic*, *basic2*, *simple*, *plain*, *dot*, *empty* (default style), *empty2*, *solid*, *solid_round*, *nice*, *double*, *double2*, *bold*, *bold2*, *frame*.
   
   * `-e`, `--ignore-empty-lines`:
     Ignore empty lines in input.
@@ -76,17 +52,13 @@ Frequently used sections:
   * `-v`, `--version`:
     Display version information and exit.
 
-  * You can put whatever you *want* here, really:
-    Nesting and paragraph spacing are respected.
-
-
 ## AUTHOR
 
 Written by Anton Seleznev.
 
 ## COPYRIGHT
 
-Copyright (C) 2018 Anton Seleznev.
+Copyright (C) 2018-2020 Anton Seleznev.
 License MIT <https://opensource.org/licenses/MIT>.
 
 ## SEE ALSO
