@@ -1,4 +1,4 @@
-fort(1) -- format input into formatted table
+fort(1) -- convert input into formatted table
 =============================================
 
 ## SYNOPSIS
@@ -38,6 +38,20 @@ Definition lists:
 Frequently used sections:
 
 ## OPTIONS
+  * `-a` <action>, `--action`=<action>:
+    Apply action on cells of the output table. Format of actions:
+    "(range|/RE/|range/RE/)action"
+
+    Examples of setting actions:
+
+    **--action=0magenta** # colorize in magenta cells in the 0th row
+
+    **--action=1-3green** # colorize in green cells in range from 1st row to 3rd row (both ends included)
+
+    **--action=/go*gle/red** # colorize in red cells that match regex 'go*gle'
+
+    **--action=3-5/go*gle/yellow** # colorize in yellow cells in range from 3rd row to 5th row (both ends included) that match regex 'go*gle'
+
   * `-b` <name>, `--border-style`=<name>:
     Set border style of the output table. Available border style names: **basic**, **basic2**, **simple**, **plain**, **dot**, **empty** (default style), **empty2**, **solid**, **solid_round**, **nice**, **double**,      **double2**, **bold**, **bold2**, **frame**.
   

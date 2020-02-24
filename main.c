@@ -112,8 +112,8 @@ static struct header_index * set_header_indexes(char *indexes_str)
     return header_indexes;
 }
 
-struct match_item {
-    struct match_item *next;
+struct action_item {
+    struct action_item *next;
     /* Regex to match */
     regex_t regex;
     int re_set;
@@ -146,24 +146,24 @@ enum ft_color string_to_color(const char *color, size_t sz)
     return FT_COLOR_DEFAULT;
 }
 
-struct match_item *match_item_create()
+struct action_item *action_create()
 {
-    struct match_item *mi = calloc(1, sizeof(struct match_item));
-    if (!mi)
-        return mi;
-    mi->row_beg = -1;
-    mi->row_end = -1;
-    return mi;
+    struct action_item *action = calloc(1, sizeof(struct action_item));
+    if (!action)
+        return action;
+    action->row_beg = -1;
+    action->row_end = -1;
+    return action;
 }
 
 /* Format of action strings: "(range|/RE/|range/RE/)action" */
-void add_match_item(struct match_item **head, const char *action_str)
+void add_action_item(struct action_item **head, const char *action_str)
 {
     size_t re_str_len = 0;
     char* re_str = NULL;
     const char *endptr = NULL;
-    struct match_item *mi = match_item_create();
-    if (!mi)
+    struct action_item *act = action_create();
+    if (!act)
         exit_with_error("Not enough memory");
 
     if (strlen(action_str) == 0)
@@ -171,14 +171,14 @@ void add_match_item(struct match_item **head, const char *action_str)
 
     /* Fill range if it is provided */
     if (isdigit(action_str[0])) {
-        mi->row_beg = strtol(action_str, (char **)&endptr, 10);
+        act->row_beg = strtol(action_str, (char **)&endptr, 10);
         if (endptr == action_str)
             exit_with_error("Ivalid format of match expession");
-        mi->row_end = mi->row_beg;
+        act->row_end = act->row_beg;
         action_str = endptr;
         if (action_str[0] == '-') {
             ++action_str;
-            mi->row_end = strtol(action_str, (char **)&endptr, 10);
+            act->row_end = strtol(action_str, (char **)&endptr, 10);
             if (endptr == action_str)
                 exit_with_error("Ivalid format of match expession");
             action_str = endptr;
@@ -207,24 +207,24 @@ void add_match_item(struct match_item **head, const char *action_str)
         re_str[re_str_len] = '\0';
         strncpy(re_str, action_str, re_str_len);
 
-        if (regcomp(&mi->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
+        if (regcomp(&act->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
             exit_with_error("Invalid regular expression");
         action_str = endptr + 1;
-        mi->re_set = 1;
+        act->re_set = 1;
     }
 
-    mi->property = FT_CPROP_CONT_FG_COLOR;
-    mi->property_value = string_to_color(action_str, strlen(action_str));
+    act->property = FT_CPROP_CONT_FG_COLOR;
+    act->property_value = string_to_color(action_str, strlen(action_str));
     
-    mi->next = *head;
-    *head = mi;
+    act->next = *head;
+    *head = act;
 }
 
-static void mark_if_match_found(ft_table_t *table, struct match_item *items_list, const char *str)
+static void apply_action_if_match(ft_table_t *table, struct action_item *items_list, const char *str)
 {
     size_t cur_row = ft_cur_row(table);
 
-    struct match_item *item = items_list;
+    struct action_item *item = items_list;
     while (item) {
         if (item->row_beg >= 0 && cur_row < (size_t)item->row_beg) 
             goto next;
@@ -245,7 +245,7 @@ struct global_opts_t {
     const char *col_separator;
     const char *row_separator;
     struct header_index *header_indexes;
-    struct match_item *match_items;
+    struct action_item *action_items;
     int ignore_empty_lines;
     int merge_empty_cells;
 } global_opts;
@@ -263,18 +263,18 @@ void free_options(struct global_opts_t *options)
     options->header_indexes = NULL;
 
     /* Free match items */
-    struct match_item *mi = options->match_items;
-    struct match_item *mi_next = NULL;
-    while (mi) {
-        mi_next = mi->next;
-        regfree(&mi->regex);
-        free(mi);
-        mi = mi_next;
+    struct action_item *a = options->action_items;
+    struct action_item *a_next = NULL;
+    while (a) {
+        a_next = a->next;
+        regfree(&a->regex);
+        free(a);
+        a = a_next;
     }
-    options->match_items = NULL;
+    options->action_items = NULL;
 }
 
-static const char *opt_string = "b:ehms:S:v";
+static const char *opt_string = "a:b:ehms:S:v";
 
 void set_default_options()
 {
@@ -283,20 +283,20 @@ void set_default_options()
     global_opts.col_separator = COL_SEPARATOR;
     global_opts.row_separator = ROW_SEPARATOR;
     global_opts.header_indexes = NULL;
-    global_opts.match_items = NULL;
+    global_opts.action_items = NULL;
     global_opts.ignore_empty_lines = 0;
     global_opts.merge_empty_cells = 0;
 }
 
 static int header_enabled = 0;
-static int match_items_enabled = 0;
+static int action_items_enabled = 0;
 
 enum option_index {
-    OPT_BORDER_STYLE_INDEX = 0,
+    OPT_ACTION_INDEX = 0,
+    OPT_BORDER_STYLE_INDEX,
     OPT_IGNORE_EMPTY_INDEX,
     OPT_HEADER_INDEX,
     OPT_HELP_INDEX,
-    OPT_MATCH_INDEX,
     OPT_MERGE_EMPTY_CELL_INDEX,
     OPT_COL_SEPARATOR_INDEX,
     OPT_ROW_SEPARATOR_INDEX,
@@ -304,11 +304,11 @@ enum option_index {
 };
 
 static const struct option long_opts[] = {
+    { "action", required_argument, &action_items_enabled, 'a'},
     { "border-style", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
-    { "match", optional_argument, &match_items_enabled, 1},
     { "merge-empty-cell", no_argument, NULL, 'm' },
     { "col-separator", required_argument, NULL, 's' },
     { "row-separator", required_argument, NULL, 'S' },
@@ -317,16 +317,16 @@ static const struct option long_opts[] = {
 
 const char HELP_STRING[] =
     "Usage: fort [OPTION]... [FILE]\n"
-    "Format input into formatted table.\n"
+    "Convert input into formatted table.\n"
     "\n"
     "With no FILE, or when FILE is -, read standard input.\n"
     "\n"
+    "  -a <action>, --action=<action>           apply action to cells of the output table\n"
     "  -b <style>, --border-style=<style>       border style of the output table\n"
     "  -e, --ignore-empty-lines                 ignore empty lines\n"
     "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
     "  -h, --help                               print help and exit\n"
     "  -m, --merge-empty-cell                   merge empty cells\n"
-    "  --match=<re>                             match regex\n"
     "  -s <set>, --col-separator=<set>          specify set of characters to be used to delimit columns\n"
     "  -S <set>, --row-separator=<set>          specify set of characters to be used to delimit rows\n"
     "  -v, --version                            output version information and exit\n";
@@ -405,8 +405,8 @@ int main(int argc, char *argv[])
             case 0:
                 if (longindex == OPT_HEADER_INDEX) {
                     global_opts.header_indexes = set_header_indexes(optarg);
-                } else if (longindex == OPT_MATCH_INDEX) {
-                    add_match_item(&global_opts.match_items, optarg);
+                } else if (longindex == OPT_ACTION_INDEX) {
+                    add_action_item(&global_opts.action_items, optarg);
                 } else {
                     exit_with_error("Invalid option"); 
                 }
@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
                 break;
             } else if (*end == '\0') {
                 if (beg != end || !global_opts.merge_empty_cells) {
-                    mark_if_match_found(table, global_opts.match_items, beg);
+                    apply_action_if_match(table, global_opts.action_items, beg);
                     ft_u8write_ln(table, beg);
                 } else {
                     ft_ln(table);
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
             *end = '\0';
 
             if (beg != end || !global_opts.merge_empty_cells) {
-                mark_if_match_found(table, global_opts.match_items, beg);
+                apply_action_if_match(table, global_opts.action_items, beg);
                 ft_u8write(table, beg);
             }
 

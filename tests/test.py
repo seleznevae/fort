@@ -724,12 +724,12 @@ test_suites.append(border_styles_test_suite)
 
 ###############  Mark test cases  ##################
 
-mark_test_suite = {
-"name": "Mark tests",
+action_test_suite = {
+"name": "Action tests",
 "scenarios": [
 {
-"name": "Match by line",
-"args": ["-b", "basic", "--match=1red"],
+"name": "Action for one line",
+"args": ["-b", "basic", "--action=1red"],
 "input": '''\
 0,1
 2,3
@@ -744,8 +744,8 @@ mark_test_suite = {
 '''
 },
 {
-"name": "Match by range of lines",
-"args": ["-b", "basic", "--match=1-2red"],
+"name": "Action for range of lines",
+"args": ["-b", "basic", "--action=1-2red"],
 "input": '''\
 0,1
 2,3
@@ -762,8 +762,8 @@ mark_test_suite = {
 '''
 },
 {
-"name": "Match by ragex",
-"args": ["-b", "basic", "--match=/.*33.*/red"],
+"name": "Action by regex",
+"args": ["-b", "basic", "--action=/.*33.*/red"],
 "input": '''\
 0,1
 2,1335
@@ -778,8 +778,8 @@ mark_test_suite = {
 '''
 },
 {
-"name": "Match by lines and regex",
-"args": ["-b", "basic", "--match=1/.*33.*/red"],
+"name": "Action by lines and regex",
+"args": ["-b", "basic", "--action=1/.*33.*/red"],
 "input": '''\
 0,1335
 2,1335
@@ -794,7 +794,7 @@ mark_test_suite = {
 '''
 },
 ]}
-test_suites.append(mark_test_suite)
+test_suites.append(action_test_suite)
 
 
 for test_suite in test_suites:
