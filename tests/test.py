@@ -728,7 +728,7 @@ action_test_suite = {
 "scenarios": [
 {
 "name": "Action for one line",
-"args": ["-b", "basic", "--action=1red"],
+"args": ["-b", "basic", "--action=1fg-red"],
 "input": '''\
 0,1
 2,3
@@ -744,7 +744,7 @@ action_test_suite = {
 },
 {
 "name": "Action for range of lines",
-"args": ["-b", "basic", "--action=1-2red"],
+"args": ["-b", "basic", "--action=1,2fg-red"],
 "input": '''\
 0,1
 2,3
@@ -762,7 +762,7 @@ action_test_suite = {
 },
 {
 "name": "Action by regex",
-"args": ["-b", "basic", "--action=/.*33.*/red"],
+"args": ["-b", "basic", "--action=/.*33.*/fg-red"],
 "input": '''\
 0,1
 2,1335
@@ -778,7 +778,7 @@ action_test_suite = {
 },
 {
 "name": "Action by lines and regex",
-"args": ["-b", "basic", "--action=1/.*33.*/red"],
+"args": ["-b", "basic", "--action=1/.*33.*/fg-red"],
 "input": '''\
 0,1335
 2,1335

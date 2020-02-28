@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <getopt.h>
@@ -146,7 +147,23 @@ enum ft_color string_to_color(const char *color, size_t sz)
     return FT_COLOR_DEFAULT;
 }
 
-struct action_item *action_create()
+static int string_to_option(const char *action, size_t *parsed)
+{
+    assert(action);
+    assert(parsed);
+    if (strstr(action, "fg-") == action) {
+        *parsed = 3;
+        return FT_CPROP_CONT_FG_COLOR;
+    } else if (strstr(action, "bg-") == action) {
+        *parsed = 3;
+        return FT_CPROP_CELL_BG_COLOR;
+    }
+
+    exit_with_error("Ivalid action string");
+    return 0;
+}
+
+static struct action_item *action_create()
 {
     struct action_item *action = calloc(1, sizeof(struct action_item));
     if (!action)
@@ -157,8 +174,11 @@ struct action_item *action_create()
 }
 
 /* Format of action strings: "(range|/RE/|range/RE/)action" */
-void add_action_item(struct action_item **head, const char *action_str)
+static void add_action_item(struct action_item **head, const char *action_str)
 {
+    const char RANGE_SEPARATOR = ',';
+
+    size_t parsed = 0;
     size_t re_str_len = 0;
     char* re_str = NULL;
     const char *endptr = NULL;
@@ -176,7 +196,7 @@ void add_action_item(struct action_item **head, const char *action_str)
             exit_with_error("Ivalid format of match expession");
         act->row_end = act->row_beg;
         action_str = endptr;
-        if (action_str[0] == '-') {
+        if (action_str[0] == RANGE_SEPARATOR) {
             ++action_str;
             act->row_end = strtol(action_str, (char **)&endptr, 10);
             if (endptr == action_str)
@@ -213,7 +233,8 @@ void add_action_item(struct action_item **head, const char *action_str)
         act->re_set = 1;
     }
 
-    act->property = FT_CPROP_CONT_FG_COLOR;
+    act->property = string_to_option(action_str, &parsed);
+    action_str += parsed;
     act->property_value = string_to_color(action_str, strlen(action_str));
     
     act->next = *head;
@@ -250,7 +271,7 @@ struct global_opts_t {
     int merge_empty_cells;
 } global_opts;
 
-void free_options(struct global_opts_t *options)
+static void free_options(struct global_opts_t *options)
 {
     /* Free headers */
     struct header_index *hi = options->header_indexes;
@@ -276,7 +297,7 @@ void free_options(struct global_opts_t *options)
 
 static const char *opt_string = "a:b:ehms:S:v";
 
-void set_default_options()
+static void set_default_options()
 {
     global_opts.border_style = FT_EMPTY_STYLE;
     global_opts.dummy = 0;
