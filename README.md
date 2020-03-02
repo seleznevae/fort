@@ -7,9 +7,10 @@
 # Build
 
 ```bash
+git clone https://github.com/seleznevae/fort && cd fort
+git submodule init && git submodule update
 mkdir build && cd build
-cmake ..
-make 
+cmake .. && make
 ```
 
 ## Usage examples
