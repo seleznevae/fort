@@ -257,6 +257,23 @@ styles_test_suite = {
 '''
 },
 {
+"name": "frame border style (long option",
+"args": ["--border=frame", "--header=0"],
+"input": '''\
+1,2
+3,4
+5,6
+''' ,
+"output": u'''\
+▛▀▀▀▀▀▀▀▜
+▌ 1 ┃ 2 ▐
+▌━━━╋━━━▐
+▌ 3 ┃ 4 ▐
+▌ 5 ┃ 6 ▐
+▙▄▄▄▄▄▄▄▟
+'''
+},
+{
 "name": "incorrect border style",
 "args": ["-b", "abraCadabra", "--header=0"],
 "input": '''\

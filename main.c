@@ -310,7 +310,6 @@ static void set_default_options()
 }
 
 static int header_enabled = 0;
-static int action_items_enabled = 0;
 
 enum option_index {
     OPT_ACTION_INDEX = 0,
@@ -325,7 +324,7 @@ enum option_index {
 };
 
 static const struct option long_opts[] = {
-    { "action", required_argument, &action_items_enabled, 'a'},
+    { "action", required_argument, NULL, 'a'},
     { "border-style", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
@@ -426,11 +425,12 @@ int main(int argc, char *argv[])
             case 0:
                 if (longindex == OPT_HEADER_INDEX) {
                     global_opts.header_indexes = set_header_indexes(optarg);
-                } else if (longindex == OPT_ACTION_INDEX) {
-                    add_action_item(&global_opts.action_items, optarg);
                 } else {
                     exit_with_error("Invalid option"); 
                 }
+                break;
+            case 'a':
+                add_action_item(&global_opts.action_items, optarg);
                 break;
             case 'b':
                 global_opts.border_style = get_border_style(optarg);
