@@ -11,7 +11,9 @@ matrix:
 
 script:
   - cmake -H. -B_build
-  - cmake --build _build -- 
+  - cmake --build _build
+  - cd _build
+  - ctest -VV
 
 
 

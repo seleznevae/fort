@@ -14,4 +14,6 @@ main_task:
     - git submodule update
 
     - cmake -H. -B_build
-    - cmake --build _build -- 
+    - cmake --build _build
+    - cd _build
+    - ctest -VV

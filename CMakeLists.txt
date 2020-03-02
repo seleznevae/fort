@@ -28,7 +28,7 @@ else()
 endif()
 
 # Add tests.
-add_custom_target(tests ALL
-    DEPENDS fort-app
-    COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/tests && ./test.py --bin-dir=${CMAKE_CURRENT_BINARY_DIR}
-)
+enable_testing()
+add_test(
+    NAME fort-test
+    COMMAND "bash" "-c" "cd ${CMAKE_CURRENT_SOURCE_DIR}/tests && ./test.py --bin-dir=${CMAKE_CURRENT_BINARY_DIR}")
