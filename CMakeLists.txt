@@ -31,4 +31,4 @@ endif()
 enable_testing()
 add_test(
     NAME fort-test
-    COMMAND "bash" "-c" "cd ${CMAKE_CURRENT_SOURCE_DIR}/tests && python2 ./test.py --bin-dir=${CMAKE_CURRENT_BINARY_DIR}")
+    COMMAND "sh" "-c" "cd ${CMAKE_CURRENT_SOURCE_DIR}/tests && python2 ./test.py --bin-dir=${CMAKE_CURRENT_BINARY_DIR}")
