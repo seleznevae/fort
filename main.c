@@ -325,7 +325,7 @@ enum option_index {
 
 static const struct option long_opts[] = {
     { "action", required_argument, NULL, 'a'},
-    { "border-style", required_argument, NULL, 'b' },
+    { "border", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
     { "header", optional_argument, &header_enabled, 1},
     { "help", no_argument, NULL, 'h' },
@@ -342,7 +342,7 @@ const char HELP_STRING[] =
     "With no FILE, or when FILE is -, read standard input.\n"
     "\n"
     "  -a <action>, --action=<action>           apply action to cells of the output table\n"
-    "  -b <style>, --border-style=<style>       border style of the output table\n"
+    "  -b <style>, --border=<style>             border style of the output table\n"
     "  -e, --ignore-empty-lines                 ignore empty lines\n"
     "  --header=<n1>[,<n2>...]                  set row numbers that will be treated as headers\n"
     "  -h, --help                               print help and exit\n"

@@ -28,7 +28,7 @@ The input is broken into lines, default line separator is "\n", and lines are br
 
     `--action=3,5/go*gle/yellow` # colorize in yellow cells in range from 3rd row to 5th row (both ends included) that match regex 'go*gle'
 
-  * `-b` <name>, `--border-style`=<name>:
+  * `-b` <name>, `--border`=<name>:
     Set border style of the output table. Available border style names: *basic*, *basic2*, *simple*, *plain*, *dot*, *empty* (default style), *empty2*, *solid*, *solid_round*, *nice*, *double*, *double2*, *bold*, *bold2*, *frame*.
   
   * `-e`, `--ignore-empty-lines`:
