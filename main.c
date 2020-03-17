@@ -23,16 +23,16 @@ static void exit_with_sys_error()
     exit(EXIT_FAILURE);
 }
 
-#define FORT_MAJOR_VERSION   0
-#define FORT_MINOR_VERSION   1
-#define FORT_BUGFIX_VERSION  0
+#define FORT_MAJOR_VERSION 0
+#define FORT_MINOR_VERSION 1
+#define FORT_BUGFIX_VERSION 0
 
 #define BUFFER_SIZE (1 << 10)
 #define MAX_BUFFER_SIZE (1 << 16)
 #define COL_SEPARATOR ","
 #define ROW_SEPARATOR "\n"
 
-const struct ft_border_style * get_border_style(const char *str)
+const struct ft_border_style *get_border_style(const char *str)
 {
     const struct ft_border_style *const border_styles[] = {
         FT_BASIC_STYLE,
@@ -52,7 +52,7 @@ const struct ft_border_style * get_border_style(const char *str)
         FT_FRAME_STYLE
     };
 
-    const char * border_style_names[] = {
+    const char *border_style_names[] = {
         "basic",
         "basic2",
         "simple",
@@ -73,7 +73,7 @@ const struct ft_border_style * get_border_style(const char *str)
 
     const unsigned STYLES_NUMBER = sizeof(border_styles) / sizeof(border_styles[0]);
 
-    for (i = 0; i <  STYLES_NUMBER; ++i) {
+    for (i = 0; i < STYLES_NUMBER; ++i) {
         if (strcmp(str, border_style_names[i]) == 0) {
             return border_styles[i];
         }
@@ -87,7 +87,7 @@ struct header_index {
     struct header_index *next;
 };
 
-static struct header_index * set_header_indexes(char *indexes_str)
+static struct header_index *set_header_indexes(char *indexes_str)
 {
     struct header_index *header_indexes = NULL;
     if (indexes_str == NULL) {
@@ -99,11 +99,11 @@ static struct header_index * set_header_indexes(char *indexes_str)
         const char *str = strtok(indexes_str, ",");
         while (str) {
             char *endptr = NULL;
-            int index = strtoll (str, &endptr, 10);
+            int index = strtoll(str, &endptr, 10);
             if (*endptr != '\0') {
-                exit_with_error("Invalid header row number");  
+                exit_with_error("Invalid header row number");
             }
-            struct header_index * new_header_index = (struct header_index *)malloc(sizeof(struct header_index));
+            struct header_index *new_header_index = (struct header_index *)malloc(sizeof(struct header_index));
             new_header_index->index = index;
             new_header_index->next = header_indexes;
             header_indexes = new_header_index;
@@ -180,7 +180,7 @@ static void add_action_item(struct action_item **head, const char *action_str)
 
     size_t parsed = 0;
     size_t re_str_len = 0;
-    char* re_str = NULL;
+    char *re_str = NULL;
     const char *endptr = NULL;
     struct action_item *act = action_create();
     if (!act)
@@ -209,8 +209,8 @@ static void add_action_item(struct action_item **head, const char *action_str)
     if (*action_str == '/') {
         ++action_str;
         endptr = action_str;
-        again:
-        while (*endptr && *endptr != '/') 
+    again:
+        while (*endptr && *endptr != '/')
             endptr++;
         if (*endptr == '\0')
             exit_with_error("Ivalid format of match expession");
@@ -227,7 +227,7 @@ static void add_action_item(struct action_item **head, const char *action_str)
         re_str[re_str_len] = '\0';
         strncpy(re_str, action_str, re_str_len);
 
-        if (regcomp(&act->regex, re_str, REG_NOSUB /* Do not report position of matches. */)) 
+        if (regcomp(&act->regex, re_str, REG_NOSUB /* Do not report position of matches. */))
             exit_with_error("Invalid regular expression");
         action_str = endptr + 1;
         act->re_set = 1;
@@ -236,7 +236,7 @@ static void add_action_item(struct action_item **head, const char *action_str)
     act->property = string_to_option(action_str, &parsed);
     action_str += parsed;
     act->property_value = string_to_color(action_str, strlen(action_str));
-    
+
     act->next = *head;
     *head = act;
 }
@@ -247,9 +247,9 @@ static void apply_action_if_match(ft_table_t *table, struct action_item *items_l
 
     struct action_item *item = items_list;
     while (item) {
-        if (item->row_beg >= 0 && cur_row < (size_t)item->row_beg) 
+        if (item->row_beg >= 0 && cur_row < (size_t)item->row_beg)
             goto next;
-        if (item->row_end >= 0 && cur_row > (size_t)item->row_end) 
+        if (item->row_end >= 0 && cur_row > (size_t)item->row_end)
             goto next;
 
         if (!item->re_set || !regexec(&item->regex, str, 0, NULL, 0)) {
@@ -324,10 +324,10 @@ enum option_index {
 };
 
 static const struct option long_opts[] = {
-    { "action", required_argument, NULL, 'a'},
+    { "action", required_argument, NULL, 'a' },
     { "border", required_argument, NULL, 'b' },
     { "ignore-empty-lines", no_argument, NULL, 'e' },
-    { "header", optional_argument, &header_enabled, 1},
+    { "header", optional_argument, &header_enabled, 1 },
     { "help", no_argument, NULL, 'h' },
     { "merge-empty-cell", no_argument, NULL, 'm' },
     { "col-separator", required_argument, NULL, 's' },
@@ -335,6 +335,7 @@ static const struct option long_opts[] = {
     { "version", no_argument, NULL, 'v' },
 };
 
+/* clang-format off */
 const char HELP_STRING[] =
     "Usage: fort [OPTION]... [FILE]\n"
     "Convert input into formatted table.\n"
@@ -350,20 +351,20 @@ const char HELP_STRING[] =
     "  -s <set>, --col-separator=<set>          specify set of characters to be used to delimit columns\n"
     "  -S <set>, --row-separator=<set>          specify set of characters to be used to delimit rows\n"
     "  -v, --version                            output version information and exit\n";
-
+/* clang-format on */
 
 char *get_next_line(FILE *fin, const char *sep_set)
 {
     static size_t size = 1024;
     static size_t end_offset = 0;
     static size_t start_offset = 0;
-    static char* cur_line = NULL;
-    
+    static char *cur_line = NULL;
+
     if (cur_line == NULL)
         cur_line = (char *)malloc(size + 1);
 
     if (cur_line == NULL)
-        exit_with_error("Not enough memory"); 
+        exit_with_error("Not enough memory");
 
     if (start_offset) {
         size_t n_remained = end_offset - start_offset;
@@ -372,11 +373,11 @@ char *get_next_line(FILE *fin, const char *sep_set)
         end_offset = n_remained;
         cur_line[end_offset] = '\0';
     }
-    
+
     while (1) {
         /* Search for new_line */
         if (end_offset) {
-            size_t nl_pos = strcspn (cur_line, sep_set);
+            size_t nl_pos = strcspn(cur_line, sep_set);
             if (nl_pos < end_offset) {
                 cur_line[nl_pos] = '\0';
                 start_offset = nl_pos + 1;
@@ -384,16 +385,16 @@ char *get_next_line(FILE *fin, const char *sep_set)
             }
         }
 
-        if (end_offset > size/2) {
+        if (end_offset > size / 2) {
             cur_line = (char *)realloc(cur_line, (size + 1) * 2);
             size *= 2;
         }
         if (cur_line == NULL)
-            exit_with_error("Not enough memory"); 
+            exit_with_error("Not enough memory");
 
         int n = fread(cur_line + end_offset, 1, (size - end_offset), fin);
         if (n == -1)
-            exit_with_error("Error during input reading"); 
+            exit_with_error("Error during input reading");
         if (n == 0) {
             if (end_offset == 0) {
                 return NULL;
@@ -422,48 +423,48 @@ int main(int argc, char *argv[])
     int longindex;
     while ((opt = getopt_long(argc, argv, opt_string, long_opts, &longindex)) != -1) {
         switch (opt) {
-            case 0:
-                if (longindex == OPT_HEADER_INDEX) {
-                    global_opts.header_indexes = set_header_indexes(optarg);
-                } else {
-                    exit_with_error("Invalid option"); 
-                }
-                break;
-            case 'a':
-                add_action_item(&global_opts.action_items, optarg);
-                break;
-            case 'b':
-                global_opts.border_style = get_border_style(optarg);
-                if (!global_opts.border_style)
-                    exit_with_error("Invalid border style");    
-                break;
-            case 'e':
-                global_opts.ignore_empty_lines = 1;
-                break;
-            case 'z':
-                printf("%s\n", optarg);
-                return EXIT_SUCCESS;
-                break;
-            case 'h':
-                printf(HELP_STRING);
-                return EXIT_SUCCESS;
-                break;
-            case 'm':
-                global_opts.merge_empty_cells = 1;
-                break;
-            case 's':
-                global_opts.col_separator = optarg;
-                break;
-            case 'S':
-                global_opts.row_separator = optarg;
-                break;
-            case 'v':
-                printf("fort %d.%d.%d\n", FORT_MAJOR_VERSION, FORT_MINOR_VERSION, FORT_BUGFIX_VERSION);
-                return EXIT_SUCCESS;
-                break;
+        case 0:
+            if (longindex == OPT_HEADER_INDEX) {
+                global_opts.header_indexes = set_header_indexes(optarg);
+            } else {
+                exit_with_error("Invalid option");
+            }
+            break;
+        case 'a':
+            add_action_item(&global_opts.action_items, optarg);
+            break;
+        case 'b':
+            global_opts.border_style = get_border_style(optarg);
+            if (!global_opts.border_style)
+                exit_with_error("Invalid border style");
+            break;
+        case 'e':
+            global_opts.ignore_empty_lines = 1;
+            break;
+        case 'z':
+            printf("%s\n", optarg);
+            return EXIT_SUCCESS;
+            break;
+        case 'h':
+            printf(HELP_STRING);
+            return EXIT_SUCCESS;
+            break;
+        case 'm':
+            global_opts.merge_empty_cells = 1;
+            break;
+        case 's':
+            global_opts.col_separator = optarg;
+            break;
+        case 'S':
+            global_opts.row_separator = optarg;
+            break;
+        case 'v':
+            printf("fort %d.%d.%d\n", FORT_MAJOR_VERSION, FORT_MINOR_VERSION, FORT_BUGFIX_VERSION);
+            return EXIT_SUCCESS;
+            break;
 
-            default:
-                exit_with_error("unrecognized arguments:"); //todo: add print unrecognised args
+        default:
+            exit_with_error("unrecognized arguments:"); //todo: add print unrecognised args
         }
     }
 
