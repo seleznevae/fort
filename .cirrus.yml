@@ -1,11 +1,12 @@
 freebsd_instance:
-  image: freebsd-12-0-release-amd64
+  image_family: freebsd-12-1
 
 main_task:
-  script:
+  install_script:
     - uname -a
-    - yes | pkg install git gmake cmake
+    - pkg install -y git gmake cmake
 
+  script:
     - ls
     - cc --version
     - c++ --version
