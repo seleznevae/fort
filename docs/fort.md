@@ -16,7 +16,8 @@ The input is broken into lines, default line separator is "\n", and lines are br
 ## OPTIONS
   * `-a` <action>, `--action`=<action>:
     Apply action on cells of the output table. Format of actions:
-    "(range|/RE/|range/RE/)action"
+    "<action ::= (range|/RE/|range/RE/)OPTION-VALUE>"
+    <OPTION ::= "bg"|"fg"|"st">
 
     Examples of setting actions:
 

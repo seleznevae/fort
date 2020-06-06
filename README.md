@@ -21,6 +21,7 @@ $ (printf "PERM LINKS OWNER GROUP SIZE MONTH DAY " ; \
    ls -l | sed 1d) | fort -b nice -s ' ' -m --header=0 --action='0bg-magenta'
 ```
 
+
 ## License
 
 <img align="right" src="http://opensource.org/trademarks/opensource/OSI-Approved-License-100x137.png">

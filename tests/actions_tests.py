@@ -107,5 +107,55 @@ action_test_suite = {
 "input": '''0,1335''' ,
 "output": "fort: error: Ivalid action string\n",
 "exitCode": 1
-}
+},
+
+# Different actions
+{
+"name": "Action foreground",
+"args": ["-b", "basic", "--action=1fg-red"],
+"input": '''\
+0,1
+2,3
+4,5
+''' ,
+"output": u'''\
++---+---+
+| 0 | 1 |
+| \x1b[31m2\x1b[0m | \x1b[31m3\x1b[0m |
+| 4 | 5 |
++---+---+
+'''
+},
+{
+"name": "Action foreground",
+"args": ["-b", "basic", "--action=1bg-red"],
+"input": '''\
+0,1
+2,3
+4,5
+''' ,
+"output": u'''\
++---+---+
+| 0 | 1 |
+|\x1b[41m 2 \x1b[0m|\x1b[41m 3 \x1b[0m|
+| 4 | 5 |
++---+---+
+'''
+},
+{
+"name": "Action foreground",
+"args": ["-b", "basic", "--action=1st-bold"],
+"input": '''\
+0,1
+2,3
+4,5
+''' ,
+"output": u'''\
++---+---+
+| 0 | 1 |
+|\x1b[1m 2 \x1b[0m|\x1b[1m 3 \x1b[0m|
+| 4 | 5 |
++---+---+
+'''
+},
 ]}

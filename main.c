@@ -147,6 +147,30 @@ enum ft_color string_to_color(const char *color, size_t sz)
     return FT_COLOR_DEFAULT;
 }
 
+enum ft_color string_to_style(const char *color, size_t sz)
+{
+    if (strncmp(color, "default", sz) == 0)
+        return FT_TSTYLE_DEFAULT;
+    if (strncmp(color, "bold", sz) == 0)
+        return FT_TSTYLE_BOLD;
+    if (strncmp(color, "dim", sz) == 0)
+        return FT_TSTYLE_DIM;
+    if (strncmp(color, "italic", sz) == 0)
+        return FT_TSTYLE_ITALIC;
+    if (strncmp(color, "underlined", sz) == 0)
+        return FT_TSTYLE_UNDERLINED;
+    if (strncmp(color, "blink", sz) == 0)
+        return FT_TSTYLE_BLINK;
+    if (strncmp(color, "inverted", sz) == 0)
+        return FT_TSTYLE_INVERTED;
+    if (strncmp(color, "hidder", sz) == 0)
+        return FT_TSTYLE_HIDDEN;
+
+    exit_with_error("Ivalid style name");
+    return FT_COLOR_DEFAULT;
+}
+
+
 static int string_to_option(const char *action, size_t *parsed)
 {
     assert(action);
@@ -157,6 +181,9 @@ static int string_to_option(const char *action, size_t *parsed)
     } else if (strstr(action, "bg-") == action) {
         *parsed = 3;
         return FT_CPROP_CELL_BG_COLOR;
+    } else if (strstr(action, "st-") == action) {
+        *parsed = 3;
+        return FT_CPROP_CELL_TEXT_STYLE;
     }
 
     exit_with_error("Ivalid action string");
@@ -235,7 +262,17 @@ static void add_action_item(struct action_item **head, const char *action_str)
 
     act->property = string_to_option(action_str, &parsed);
     action_str += parsed;
-    act->property_value = string_to_color(action_str, strlen(action_str));
+    switch (act->property) {
+        case FT_CPROP_CONT_FG_COLOR:
+        case FT_CPROP_CELL_BG_COLOR:
+            act->property_value = string_to_color(action_str, strlen(action_str));
+            break;
+        case FT_CPROP_CELL_TEXT_STYLE:
+            act->property_value = string_to_style(action_str, strlen(action_str));
+            break;
+        default:
+            exit_with_error("Internal error: unsupported property code");
+    }
 
     act->next = *head;
     *head = act;
