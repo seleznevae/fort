@@ -5,10 +5,16 @@ matrix:
       os: linux
       sudo: false
       compiler: gcc
+      env: CLANGFORMAT=ON
       addons:
         apt:
           packages:
           - clang-format
+
+    - name: "Basic linux clang"
+      os: linux
+      compiler: clang
+
 
 before_script:
   - git submodule init
@@ -20,6 +26,10 @@ script:
   - cd _build
   - ctest -VV
   - cd ..
-  - clang-format --version
+  - |
+    if [ "${CLANGFORMAT}" = "ON" ]; then
+      clang-format main.c > main_formatted.c
+      diff main.c main_formatted.c
+    fi
 
 
