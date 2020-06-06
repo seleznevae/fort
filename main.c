@@ -170,7 +170,6 @@ enum ft_color string_to_style(const char *color, size_t sz)
     return FT_COLOR_DEFAULT;
 }
 
-
 static int string_to_option(const char *action, size_t *parsed)
 {
     assert(action);
@@ -263,15 +262,15 @@ static void add_action_item(struct action_item **head, const char *action_str)
     act->property = string_to_option(action_str, &parsed);
     action_str += parsed;
     switch (act->property) {
-        case FT_CPROP_CONT_FG_COLOR:
-        case FT_CPROP_CELL_BG_COLOR:
-            act->property_value = string_to_color(action_str, strlen(action_str));
-            break;
-        case FT_CPROP_CELL_TEXT_STYLE:
-            act->property_value = string_to_style(action_str, strlen(action_str));
-            break;
-        default:
-            exit_with_error("Internal error: unsupported property code");
+    case FT_CPROP_CONT_FG_COLOR:
+    case FT_CPROP_CELL_BG_COLOR:
+        act->property_value = string_to_color(action_str, strlen(action_str));
+        break;
+    case FT_CPROP_CELL_TEXT_STYLE:
+        act->property_value = string_to_style(action_str, strlen(action_str));
+        break;
+    default:
+        exit_with_error("Internal error: unsupported property code");
     }
 
     act->next = *head;
